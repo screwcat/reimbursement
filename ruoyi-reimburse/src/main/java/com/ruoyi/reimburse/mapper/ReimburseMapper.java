@@ -1,8 +1,7 @@
-package com.reimburse.mapper;
+package com.ruoyi.reimburse.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.reimburse.domain.Reimburse;
-import org.apache.ibatis.annotations.Param;
+import com.ruoyi.reimburse.domain.Reimburse;
 
 import java.util.List;
 
@@ -27,5 +26,5 @@ public interface ReimburseMapper extends BaseMapper<Reimburse>
      * @param billNo 单据编号
      * @return 报销申请
      */
-    Reimburse selectReimburseByBillNo(@Param("billNo") String billNo);
+//    Reimburse selectReimburseByBillNo(@Param("billNo") String billNo);
 }

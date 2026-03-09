@@ -12,12 +12,14 @@ import org.springframework.context.annotation.ComponentScan;
  * @author ruoyi
  */
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
-@ComponentScan(basePackages = {"com.ruoyi", "com.reimburse"})
-@MapperScan({
-        "com.ruoyi.system.mapper",    // 若依原有mapper
-        "com.ruoyi.generator.mapper", // 若依生成器mapper（如有）
-        "com.reimburse.mapper"        // 你的报销模块mapper（按需添加）
-})
+//@ComponentScan(basePackages = {"com.ruoyi", "com.ruoyi.reimburse"})
+//@MapperScan({
+//        "com.ruoyi.system.mapper",    // 若依原有mapper
+//        "com.ruoyi.generator.mapper", // 若依生成器mapper（如有）
+//        "com.reimburse.mapper"        // 你的报销模块mapper（按需添加）
+//})
+//@MapperScan("com.baomidou.mybatisplus.samples.quickstart.mapper")
+@MapperScan("com.ruoyi.reimburse.mapper") // 扫描mapper接口包
 public class RuoYiApplication
 {
     public static void main(String[] args)

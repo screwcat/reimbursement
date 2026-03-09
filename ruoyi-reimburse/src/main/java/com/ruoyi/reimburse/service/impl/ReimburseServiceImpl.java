@@ -1,13 +1,13 @@
-package com.reimburse.service.impl;
+package com.ruoyi.reimburse.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.reimburse.domain.Reimburse;
-import com.reimburse.domain.ReimburseAttachment;
-import com.reimburse.domain.ReimburseDetail;
-import com.reimburse.mapper.ReimburseAttachmentMapper;
-import com.reimburse.mapper.ReimburseDetailMapper;
-import com.reimburse.mapper.ReimburseMapper;
-import com.reimburse.service.IReimburseService;
+import com.ruoyi.reimburse.domain.Reimburse;
+import com.ruoyi.reimburse.domain.ReimburseAttachment;
+import com.ruoyi.reimburse.domain.ReimburseDetail;
+import com.ruoyi.reimburse.mapper.ReimburseAttachmentMapper;
+import com.ruoyi.reimburse.mapper.ReimburseDetailMapper;
+import com.ruoyi.reimburse.mapper.ReimburseMapper;
+import com.ruoyi.reimburse.service.IReimburseService;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
@@ -219,11 +219,11 @@ public class ReimburseServiceImpl extends ServiceImpl<ReimburseMapper, Reimburse
         int randomNum = ThreadLocalRandom.current().nextInt(100000, 999999);
         String billNo = "REIM" + dateStr + randomNum;
         // 校验唯一性
-        while (reimburseMapper.selectReimburseByBillNo(billNo) != null)
-        {
+//        while (reimburseMapper.selectReimburseByBillNo(billNo) != null)
+//        {
             randomNum = ThreadLocalRandom.current().nextInt(100000, 999999);
             billNo = "REIM" + dateStr + randomNum;
-        }
+//        }
         return billNo;
     }
 }

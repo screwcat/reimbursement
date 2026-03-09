@@ -1,7 +1,7 @@
-package com.reimburse.mapper;
+package com.ruoyi.reimburse.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.reimburse.domain.ReimburseDetail;
+import com.ruoyi.reimburse.domain.ReimburseDetail;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

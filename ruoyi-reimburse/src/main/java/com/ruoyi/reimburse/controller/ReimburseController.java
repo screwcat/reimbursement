@@ -1,9 +1,9 @@
-package com.reimburse.controller;
+package com.ruoyi.reimburse.controller;
 
-import com.reimburse.domain.Reimburse;
-import com.reimburse.domain.ReimburseAttachment;
-import com.reimburse.domain.ReimburseDetail;
-import com.reimburse.service.IReimburseService;
+import com.ruoyi.reimburse.domain.Reimburse;
+import com.ruoyi.reimburse.domain.ReimburseAttachment;
+import com.ruoyi.reimburse.domain.ReimburseDetail;
+import com.ruoyi.reimburse.service.IReimburseService;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.core.controller.BaseController;
@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +44,7 @@ public class ReimburseController extends BaseController
     {
         startPage();
         List<Reimburse> list = reimburseService.selectReimburseList(reimburse);
+//        List<Reimburse> list = new ArrayList<>();
         return getDataTable(list);
     }
 

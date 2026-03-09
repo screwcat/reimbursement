@@ -1,9 +1,9 @@
-package com.reimburse.service;
+package com.ruoyi.reimburse.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.reimburse.domain.Reimburse;
-import com.reimburse.domain.ReimburseAttachment;
-import com.reimburse.domain.ReimburseDetail;
+import com.ruoyi.reimburse.domain.Reimburse;
+import com.ruoyi.reimburse.domain.ReimburseAttachment;
+import com.ruoyi.reimburse.domain.ReimburseDetail;
 
 import java.util.List;
 import java.util.Map;
