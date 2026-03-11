@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysReimburseMapper">
+    
+    <resultMap type="SysReimburse" id="SysReimburseResult">
+        <result property="reimburseId"    column="reimburse_id"    />
+        <result property="billNo"    column="bill_no"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="monthSelect"    column="month_select"    />
+        <result property="ticketTotal"    column="ticket_total"    />
+        <result property="totalAmount"    column="total_amount"    />
+        <result property="remark"    column="remark"    />
+        <result property="submitTime"    column="submit_time"    />
+        <result property="processStatus"    column="process_status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectSysReimburseVo">
+        select reimburse_id, bill_no, start_time, end_time, month_select, ticket_total, total_amount, remark, submit_time, process_status, create_by, create_time, update_by, update_time, del_flag from sys_reimburse
+    </sql>
+
+    <select id="selectSysReimburseList" parameterType="SysReimburse" resultMap="SysReimburseResult">
+        <include refid="selectSysReimburseVo"/>
+        <where>  
+            <if test="billNo != null  and billNo != ''"> and bill_no = #{billNo}</if>
+            <if test="startTime != null "> and start_time = #{startTime}</if>
+            <if test="endTime != null "> and end_time = #{endTime}</if>
+            <if test="monthSelect != null  and monthSelect != ''"> and month_select = #{monthSelect}</if>
+            <if test="ticketTotal != null "> and ticket_total = #{ticketTotal}</if>
+            <if test="totalAmount != null "> and total_amount = #{totalAmount}</if>
+            <if test="submitTime != null "> and submit_time = #{submitTime}</if>
+            <if test="processStatus != null  and processStatus != ''"> and process_status = #{processStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectSysReimburseByReimburseId" parameterType="Long" resultMap="SysReimburseResult">
+        <include refid="selectSysReimburseVo"/>
+        where reimburse_id = #{reimburseId}
+    </select>
+
+    <insert id="insertSysReimburse" parameterType="SysReimburse" useGeneratedKeys="true" keyProperty="reimburseId">
+        insert into sys_reimburse
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="billNo != null and billNo != ''">bill_no,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="monthSelect != null and monthSelect != ''">month_select,</if>
+            <if test="ticketTotal != null">ticket_total,</if>
+            <if test="totalAmount != null">total_amount,</if>
+            <if test="remark != null">remark,</if>
+            <if test="submitTime != null">submit_time,</if>
+            <if test="processStatus != null and processStatus != ''">process_status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="billNo != null and billNo != ''">#{billNo},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="monthSelect != null and monthSelect != ''">#{monthSelect},</if>
+            <if test="ticketTotal != null">#{ticketTotal},</if>
+            <if test="totalAmount != null">#{totalAmount},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="submitTime != null">#{submitTime},</if>
+            <if test="processStatus != null and processStatus != ''">#{processStatus},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSysReimburse" parameterType="SysReimburse">
+        update sys_reimburse
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="billNo != null and billNo != ''">bill_no = #{billNo},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="monthSelect != null and monthSelect != ''">month_select = #{monthSelect},</if>
+            <if test="ticketTotal != null">ticket_total = #{ticketTotal},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="submitTime != null">submit_time = #{submitTime},</if>
+            <if test="processStatus != null and processStatus != ''">process_status = #{processStatus},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where reimburse_id = #{reimburseId}
+    </update>
+
+    <delete id="deleteSysReimburseByReimburseId" parameterType="Long">
+        delete from sys_reimburse where reimburse_id = #{reimburseId}
+    </delete>
+
+    <delete id="deleteSysReimburseByReimburseIds" parameterType="String">
+        delete from sys_reimburse where reimburse_id in 
+        <foreach item="reimburseId" collection="array" open="(" separator="," close=")">
+            #{reimburseId}
+        </foreach>
+    </delete>
+</mapper>
