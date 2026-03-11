@@ -1,4 +1,4 @@
-package com.ruoyi.reimburse.domain;
+package com.ruoyi.system.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -10,7 +10,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
  * 报销申请单主对象 sys_reimburse
- *
+ * 
  * @author ruoyi
  * @date 2026-03-07
  */
@@ -59,102 +59,102 @@ public class SysReimburse extends BaseEntity
     /** 删除标志（0代表存在 2代表删除） */
     private String delFlag;
 
-    public void setReimburseId(Long reimburseId)
+    public void setReimburseId(Long reimburseId) 
     {
         this.reimburseId = reimburseId;
     }
 
-    public Long getReimburseId()
+    public Long getReimburseId() 
     {
         return reimburseId;
     }
 
-    public void setBillNo(String billNo)
+    public void setBillNo(String billNo) 
     {
         this.billNo = billNo;
     }
 
-    public String getBillNo()
+    public String getBillNo() 
     {
         return billNo;
     }
 
-    public void setStartTime(Date startTime)
+    public void setStartTime(Date startTime) 
     {
         this.startTime = startTime;
     }
 
-    public Date getStartTime()
+    public Date getStartTime() 
     {
         return startTime;
     }
 
-    public void setEndTime(Date endTime)
+    public void setEndTime(Date endTime) 
     {
         this.endTime = endTime;
     }
 
-    public Date getEndTime()
+    public Date getEndTime() 
     {
         return endTime;
     }
 
-    public void setMonthSelect(String monthSelect)
+    public void setMonthSelect(String monthSelect) 
     {
         this.monthSelect = monthSelect;
     }
 
-    public String getMonthSelect()
+    public String getMonthSelect() 
     {
         return monthSelect;
     }
 
-    public void setTicketTotal(Long ticketTotal)
+    public void setTicketTotal(Long ticketTotal) 
     {
         this.ticketTotal = ticketTotal;
     }
 
-    public Long getTicketTotal()
+    public Long getTicketTotal() 
     {
         return ticketTotal;
     }
 
-    public void setTotalAmount(BigDecimal totalAmount)
+    public void setTotalAmount(BigDecimal totalAmount) 
     {
         this.totalAmount = totalAmount;
     }
 
-    public BigDecimal getTotalAmount()
+    public BigDecimal getTotalAmount() 
     {
         return totalAmount;
     }
 
-    public void setSubmitTime(Date submitTime)
+    public void setSubmitTime(Date submitTime) 
     {
         this.submitTime = submitTime;
     }
 
-    public Date getSubmitTime()
+    public Date getSubmitTime() 
     {
         return submitTime;
     }
 
-    public void setProcessStatus(String processStatus)
+    public void setProcessStatus(String processStatus) 
     {
         this.processStatus = processStatus;
     }
 
-    public String getProcessStatus()
+    public String getProcessStatus() 
     {
         return processStatus;
     }
 
-    public void setDelFlag(String delFlag)
+    public void setDelFlag(String delFlag) 
     {
         this.delFlag = delFlag;
     }
 
-    public String getDelFlag()
+    public String getDelFlag() 
     {
         return delFlag;
     }

@@ -1,10 +1,7 @@
-package com.ruoyi.reimburse.controller;
+package com.ruoyi.system.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-
-import com.ruoyi.reimburse.domain.SysReimburse;
-import com.ruoyi.reimburse.service.ISysReimburseService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +16,8 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.system.domain.SysReimburse;
+import com.ruoyi.system.service.ISysReimburseService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfo;
 
@@ -29,7 +28,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * @date 2026-03-07
  */
 @RestController
-@RequestMapping("/system/reimburse")
+@RequestMapping("/reimburse")
 public class SysReimburseController extends BaseController
 {
     @Autowired
@@ -38,7 +37,7 @@ public class SysReimburseController extends BaseController
     /**
      * 查询报销申请单主列表
      */
-//    @PreAuthorize("@ss.hasPermi('system:reimburse:list')")
+    @PreAuthorize("@ss.hasPermi('system:reimburse:list')")
     @GetMapping("/list")
     public TableDataInfo list(SysReimburse sysReimburse)
     {
