@@ -1,7 +1,13 @@
-package com.ruoyi.system.controller;
+package com.ruoyi.reimburse.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.reimburse.domain.ReimburseRequest;
+import com.ruoyi.reimburse.domain.SysReimburse;
+import com.ruoyi.reimburse.domain.SysReimburseAttachment;
+import com.ruoyi.reimburse.domain.SysReimburseDetail;
+import com.ruoyi.reimburse.service.ISysReimburseService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,8 +22,6 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.system.domain.SysReimburse;
-import com.ruoyi.system.service.ISysReimburseService;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfo;
 
@@ -78,6 +82,14 @@ public class SysReimburseController extends BaseController
     public AjaxResult add(@RequestBody SysReimburse sysReimburse)
     {
         return toAjax(sysReimburseService.insertSysReimburse(sysReimburse));
+    }
+
+//    @PreAuthorize("@ss.hasPermi('system:reimburse:add')")
+    @Log(title = "报销申请单主", businessType = BusinessType.INSERT)
+    @PostMapping("/addReimburse")
+    public AjaxResult addReimburse(@RequestBody ReimburseRequest reimburseRequest)
+    {
+        return toAjax(sysReimburseService.createReimburse(reimburseRequest));
     }
 
     /**

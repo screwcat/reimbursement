@@ -26,6 +26,15 @@ export function addReimburse(data) {
   })
 }
 
+// 新增报销申请单
+export function addReimComplete(data) {
+  return request({
+    url: '/reimburse/addReimburse',
+    method: 'post',
+    data: data
+  })
+}
+
 // 修改报销申请
 export function updateReimburse(data) {
   return request({

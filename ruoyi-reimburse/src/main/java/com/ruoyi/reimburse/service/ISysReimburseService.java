@@ -1,19 +1,22 @@
-package com.ruoyi.system.service;
+package com.ruoyi.reimburse.service;
+
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.ruoyi.reimburse.domain.ReimburseRequest;
+import com.ruoyi.reimburse.domain.SysReimburse;
 
 import java.util.List;
-import com.ruoyi.system.domain.SysReimburse;
 
 /**
  * 报销申请单主Service接口
- * 
+ *
  * @author ruoyi
  * @date 2026-03-07
  */
-public interface ISysReimburseService 
+public interface ISysReimburseService extends IService<SysReimburse>
 {
     /**
      * 查询报销申请单主
-     * 
+     *
      * @param reimburseId 报销申请单主主键
      * @return 报销申请单主
      */
@@ -21,7 +24,7 @@ public interface ISysReimburseService
 
     /**
      * 查询报销申请单主列表
-     * 
+     *
      * @param sysReimburse 报销申请单主
      * @return 报销申请单主集合
      */
@@ -29,15 +32,18 @@ public interface ISysReimburseService
 
     /**
      * 新增报销申请单主
-     * 
+     *
      * @param sysReimburse 报销申请单主
      * @return 结果
      */
     public int insertSysReimburse(SysReimburse sysReimburse);
 
+
+    public int createReimburse(ReimburseRequest reimburseRequest);
+
     /**
      * 修改报销申请单主
-     * 
+     *
      * @param sysReimburse 报销申请单主
      * @return 结果
      */
@@ -45,7 +51,7 @@ public interface ISysReimburseService
 
     /**
      * 批量删除报销申请单主
-     * 
+     *
      * @param reimburseIds 需要删除的报销申请单主主键集合
      * @return 结果
      */
@@ -53,7 +59,7 @@ public interface ISysReimburseService
 
     /**
      * 删除报销申请单主信息
-     * 
+     *
      * @param reimburseId 报销申请单主主键
      * @return 结果
      */

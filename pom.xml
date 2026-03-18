@@ -184,11 +184,11 @@
             </dependency>
 
             <!-- 定时任务-->
-            <dependency>
-                <groupId>com.ruoyi</groupId>
-                <artifactId>ruoyi-quartz</artifactId>
-                <version>${ruoyi.version}</version>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.ruoyi</groupId>-->
+<!--                <artifactId>ruoyi-quartz</artifactId>-->
+<!--                <version>${ruoyi.version}</version>-->
+<!--            </dependency>-->
 
             <!-- 代码生成-->
             <dependency>
@@ -224,6 +224,36 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
+            <!-- 1. 锁定 MyBatis 版本（MP 3.5.3.1 适配 MyBatis 3.5.9） -->
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>3.5.9</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis-spring</artifactId>
+                <version>2.0.7</version>
+            </dependency>
+
+            <!-- 2. 锁定 MyBatis-Plus 版本（与 MyBatis 3.5.9 完全兼容） -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>3.5.3.1</version>
+                <!-- 强制排除 MP 自带的 MyBatis 依赖，统一用上面锁定的版本 -->
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.mybatis</groupId>
+                        <artifactId>mybatis</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.mybatis</groupId>
+                        <artifactId>mybatis-spring</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -231,7 +261,7 @@
         <module>ruoyi-admin</module>
         <module>ruoyi-framework</module>
         <module>ruoyi-system</module>
-        <module>ruoyi-quartz</module>
+<!--        <module>ruoyi-quartz</module>-->
         <module>ruoyi-generator</module>
         <module>ruoyi-common</module>
         <module>ruoyi-reimburse</module>

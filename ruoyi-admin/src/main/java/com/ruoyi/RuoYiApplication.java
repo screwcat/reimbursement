@@ -12,6 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
  * @author ruoyi
  */
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
+@MapperScan({"com.ruoyi.**.mapper", "com.ruoyi.reimburse.mapper"})
 public class RuoYiApplication
 {
     public static void main(String[] args)

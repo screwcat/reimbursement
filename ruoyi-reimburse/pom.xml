@@ -21,13 +21,12 @@
             <artifactId>lombok</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.15</version>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-common</artifactId>
         </dependency>
         <dependency>
             <groupId>com.ruoyi</groupId>
-            <artifactId>ruoyi-common</artifactId>
+            <artifactId>ruoyi-framework</artifactId>
         </dependency>
     </dependencies>
 

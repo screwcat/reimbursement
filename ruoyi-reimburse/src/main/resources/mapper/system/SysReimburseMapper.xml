@@ -2,8 +2,8 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ruoyi.system.mapper.SysReimburseMapper">
-    
+<mapper namespace="com.ruoyi.reimburse.mapper.SysReimburseMapper">
+
     <resultMap type="SysReimburse" id="SysReimburseResult">
         <result property="reimburseId"    column="reimburse_id"    />
         <result property="billNo"    column="bill_no"    />
@@ -28,7 +28,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectSysReimburseList" parameterType="SysReimburse" resultMap="SysReimburseResult">
         <include refid="selectSysReimburseVo"/>
-        <where>  
+        <where>
             <if test="billNo != null  and billNo != ''"> and bill_no = #{billNo}</if>
             <if test="startTime != null "> and start_time = #{startTime}</if>
             <if test="endTime != null "> and end_time = #{endTime}</if>
@@ -39,7 +39,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="processStatus != null  and processStatus != ''"> and process_status = #{processStatus}</if>
         </where>
     </select>
-    
+
     <select id="selectSysReimburseByReimburseId" parameterType="Long" resultMap="SysReimburseResult">
         <include refid="selectSysReimburseVo"/>
         where reimburse_id = #{reimburseId}
@@ -48,7 +48,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <insert id="insertSysReimburse" parameterType="SysReimburse" useGeneratedKeys="true" keyProperty="reimburseId">
         insert into sys_reimburse
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="billNo != null and billNo != ''">bill_no,</if>
+            bill_no,
             <if test="startTime != null">start_time,</if>
             <if test="endTime != null">end_time,</if>
             <if test="monthSelect != null and monthSelect != ''">month_select,</if>
@@ -64,7 +64,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="delFlag != null">del_flag,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="billNo != null and billNo != ''">#{billNo},</if>
+            get_bill_no(),
             <if test="startTime != null">#{startTime},</if>
             <if test="endTime != null">#{endTime},</if>
             <if test="monthSelect != null and monthSelect != ''">#{monthSelect},</if>
@@ -107,7 +107,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteSysReimburseByReimburseIds" parameterType="String">
-        delete from sys_reimburse where reimburse_id in 
+        delete from sys_reimburse where reimburse_id in
         <foreach item="reimburseId" collection="array" open="(" separator="," close=")">
             #{reimburseId}
         </foreach>

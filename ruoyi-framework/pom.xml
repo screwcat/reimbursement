@@ -58,6 +58,23 @@
             <groupId>com.ruoyi</groupId>
             <artifactId>ruoyi-system</artifactId>
         </dependency>
+        <!-- 移除若依原生的 MyBatis 依赖（如果有） -->
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <scope>provided</scope> <!-- 标记为已提供，避免重复 -->
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- 引入 MyBatis-Plus（继承父模块版本，自动使用锁定的 MyBatis 3.5.9） -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+        </dependency>
 
     </dependencies>
 

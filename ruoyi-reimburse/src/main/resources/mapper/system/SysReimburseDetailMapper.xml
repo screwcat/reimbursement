@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.reimburse.mapper.SysReimburseDetailMapper">
+
+    <resultMap type="SysReimburseDetail" id="SysReimburseDetailResult">
+        <result property="detailId"    column="detail_id"    />
+        <result property="reimburseId"    column="reimburse_id"    />
+        <result property="ticketType"    column="ticket_type"    />
+        <result property="ticketNum"    column="ticket_num"    />
+        <result property="startPlace"    column="start_place"    />
+        <result property="endPlace"    column="end_place"    />
+        <result property="ticketDate"    column="ticket_date"    />
+        <result property="amount"    column="amount"    />
+        <result property="accommodation"    column="accommodation"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectSysReimburseDetailVo">
+        select detail_id, reimburse_id, ticket_type, ticket_num, start_place, end_place, ticket_date, amount, accommodation, create_time, update_time from sys_reimburse_detail
+    </sql>
+
+    <select id="selectSysReimburseDetailList" parameterType="SysReimburseDetail" resultMap="SysReimburseDetailResult">
+        <include refid="selectSysReimburseDetailVo"/>
+        <where>
+            <if test="reimburseId != null "> and reimburse_id = #{reimburseId}</if>
+            <if test="ticketType != null  and ticketType != ''"> and ticket_type = #{ticketType}</if>
+            <if test="ticketNum != null "> and ticket_num = #{ticketNum}</if>
+            <if test="startPlace != null  and startPlace != ''"> and start_place = #{startPlace}</if>
+            <if test="endPlace != null  and endPlace != ''"> and end_place = #{endPlace}</if>
+            <if test="ticketDate != null "> and ticket_date = #{ticketDate}</if>
+            <if test="amount != null "> and amount = #{amount}</if>
+            <if test="accommodation != null  and accommodation != ''"> and accommodation = #{accommodation}</if>
+        </where>
+    </select>
+
+    <select id="selectSysReimburseDetailByDetailId" parameterType="Long" resultMap="SysReimburseDetailResult">
+        <include refid="selectSysReimburseDetailVo"/>
+        where detail_id = #{detailId}
+    </select>
+
+    <insert id="insertSysReimburseDetail" parameterType="SysReimburseDetail" useGeneratedKeys="true" keyProperty="detailId">
+        insert into sys_reimburse_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="reimburseId != null">reimburse_id,</if>
+            <if test="ticketType != null and ticketType != ''">ticket_type,</if>
+            <if test="ticketNum != null">ticket_num,</if>
+            <if test="startPlace != null and startPlace != ''">start_place,</if>
+            <if test="endPlace != null and endPlace != ''">end_place,</if>
+            <if test="ticketDate != null">ticket_date,</if>
+            <if test="amount != null">amount,</if>
+            <if test="accommodation != null">accommodation,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="reimburseId != null">#{reimburseId},</if>
+            <if test="ticketType != null and ticketType != ''">#{ticketType},</if>
+            <if test="ticketNum != null">#{ticketNum},</if>
+            <if test="startPlace != null and startPlace != ''">#{startPlace},</if>
+            <if test="endPlace != null and endPlace != ''">#{endPlace},</if>
+            <if test="ticketDate != null">#{ticketDate},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="accommodation != null">#{accommodation},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSysReimburseDetail" parameterType="SysReimburseDetail">
+        update sys_reimburse_detail
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="reimburseId != null">reimburse_id = #{reimburseId},</if>
+            <if test="ticketType != null and ticketType != ''">ticket_type = #{ticketType},</if>
+            <if test="ticketNum != null">ticket_num = #{ticketNum},</if>
+            <if test="startPlace != null and startPlace != ''">start_place = #{startPlace},</if>
+            <if test="endPlace != null and endPlace != ''">end_place = #{endPlace},</if>
+            <if test="ticketDate != null">ticket_date = #{ticketDate},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="accommodation != null">accommodation = #{accommodation},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where detail_id = #{detailId}
+    </update>
+
+    <delete id="deleteSysReimburseDetailByDetailId" parameterType="Long">
+        delete from sys_reimburse_detail where detail_id = #{detailId}
+    </delete>
+
+    <delete id="deleteSysReimburseDetailByDetailIds" parameterType="String">
+        delete from sys_reimburse_detail where detail_id in
+        <foreach item="detailId" collection="array" open="(" separator="," close=")">
+            #{detailId}
+        </foreach>
+    </delete>
+</mapper>

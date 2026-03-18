@@ -188,7 +188,7 @@
 </template>
 
 <script>
-import { getReimburse, addReimburse, updateReimburse } from "@/api/reimburse";
+import { getReimburse, addReimburse, addReimComplete, updateReimburse } from "@/api/reimburse";
 import { getToken } from "@/utils/auth";
 
 export default {
@@ -360,7 +360,7 @@ export default {
                 reject(error);
               });
             } else {
-              addReimburse(params).then(() => {
+              addReimComplete(params).then(() => {
                 this.$modal.msgSuccess("新增成功");
                 resolve();
               }).catch(error => {
