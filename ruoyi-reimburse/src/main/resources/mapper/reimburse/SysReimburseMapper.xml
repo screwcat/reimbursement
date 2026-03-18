@@ -23,20 +23,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectSysReimburseVo">
-        select reimburse_id, bill_no, start_time, end_time, month_select, ticket_total, total_amount, remark, submit_time, process_status, create_by, create_time, update_by, update_time, del_flag from sys_reimburse
+        select sr.reimburse_id, bill_no, start_time, end_time, month_select, ticket_total, sum_amount total_amount, remark, submit_time, process_status, create_by, create_time, update_by, update_time, del_flag from sys_reimburse sr LEFT JOIN (SELECT reimburse_id,SUM(amount)sum_amount FROM sys_reimburse_detail GROUP BY reimburse_id)srd ON sr.reimburse_id = srd.reimburse_id
     </sql>
 
     <select id="selectSysReimburseList" parameterType="SysReimburse" resultMap="SysReimburseResult">
         <include refid="selectSysReimburseVo"/>
         <where>
-            <if test="billNo != null  and billNo != ''"> and bill_no = #{billNo}</if>
-            <if test="startTime != null "> and start_time = #{startTime}</if>
-            <if test="endTime != null "> and end_time = #{endTime}</if>
-            <if test="monthSelect != null  and monthSelect != ''"> and month_select = #{monthSelect}</if>
-            <if test="ticketTotal != null "> and ticket_total = #{ticketTotal}</if>
-            <if test="totalAmount != null "> and total_amount = #{totalAmount}</if>
-            <if test="submitTime != null "> and submit_time = #{submitTime}</if>
-            <if test="processStatus != null  and processStatus != ''"> and process_status = #{processStatus}</if>
+            <if test="billNo != null  and billNo != ''"> and sr.bill_no = #{billNo}</if>
+            <if test="startTime != null "> and sr.start_time = #{startTime}</if>
+            <if test="endTime != null "> and sr.end_time = #{endTime}</if>
+            <if test="monthSelect != null  and monthSelect != ''"> and sr.month_select = #{monthSelect}</if>
+            <if test="ticketTotal != null "> and sr.ticket_total = #{ticketTotal}</if>
+            <if test="totalAmount != null "> and sr.total_amount = #{totalAmount}</if>
+            <if test="submitTime != null "> and sr.submit_time = #{submitTime}</if>
+            <if test="processStatus != null  and processStatus != ''"> and sr.process_status = #{processStatus}</if>
         </where>
     </select>
 

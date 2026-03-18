@@ -1,11 +1,11 @@
 package com.ruoyi.reimburse.service.impl;
 
 import java.util.List;
-
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.reimburse.domain.ReimburseRequest;
 import com.ruoyi.reimburse.domain.SysReimburse;
+import com.ruoyi.reimburse.domain.SysReimburseAttachment;
+import com.ruoyi.reimburse.domain.SysReimburseDetail;
 import com.ruoyi.reimburse.mapper.SysReimburseMapper;
 import com.ruoyi.reimburse.service.ISysReimburseAttachmentService;
 import com.ruoyi.reimburse.service.ISysReimburseDetailService;
@@ -13,6 +13,7 @@ import com.ruoyi.reimburse.service.ISysReimburseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static com.ruoyi.common.utils.SecurityUtils.getUsername;
 
 /**
  * 报销申请单主Service业务层处理
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Service;
  * @date 2026-03-07
  */
 @Service
-public class SysReimburseServiceImpl extends ServiceImpl<SysReimburseMapper,SysReimburse> implements ISysReimburseService
+public class SysReimburseServiceImpl implements ISysReimburseService
 {
     @Autowired
     private SysReimburseMapper sysReimburseMapper;
@@ -31,8 +32,6 @@ public class SysReimburseServiceImpl extends ServiceImpl<SysReimburseMapper,SysR
 
     @Autowired
     private ISysReimburseAttachmentService sysReimburseAttachmentService;
-
-
 
     /**
      * 查询报销申请单主
@@ -46,6 +45,22 @@ public class SysReimburseServiceImpl extends ServiceImpl<SysReimburseMapper,SysR
         return sysReimburseMapper.selectSysReimburseByReimburseId(reimburseId);
     }
 
+    @Override
+    public ReimburseRequest getReimburseInfo(Long reimburseId) {
+        ReimburseRequest reimburseRequest = new ReimburseRequest();
+        SysReimburseDetail sysReimburseDetail = new SysReimburseDetail();
+        SysReimburseAttachment sysReimburseAttachment = new SysReimburseAttachment();
+        sysReimburseDetail.setReimburseId(reimburseId);
+        sysReimburseAttachment.setReimburseId(reimburseId);
+        SysReimburse sysReimburse = sysReimburseMapper.selectSysReimburseByReimburseId(reimburseId);
+        List<SysReimburseDetail> detailList = sysReimburseDetailService.selectSysReimburseDetailList(sysReimburseDetail);
+        List<SysReimburseAttachment> attachList = sysReimburseAttachmentService.selectSysReimburseAttachmentList(sysReimburseAttachment);
+        reimburseRequest.setReimburse(sysReimburse);
+        reimburseRequest.setDetailList(detailList);
+        reimburseRequest.setAttachmentList(attachList);
+        return reimburseRequest;
+    }
+
     /**
      * 查询报销申请单主列表
      *
@@ -55,6 +70,10 @@ public class SysReimburseServiceImpl extends ServiceImpl<SysReimburseMapper,SysR
     @Override
     public List<SysReimburse> selectSysReimburseList(SysReimburse sysReimburse)
     {
+        String userName = getUsername();
+        if(userName != "admin"){
+            sysReimburse.setCreateBy(userName);
+        }
         return sysReimburseMapper.selectSysReimburseList(sysReimburse);
     }
 
@@ -69,21 +88,6 @@ public class SysReimburseServiceImpl extends ServiceImpl<SysReimburseMapper,SysR
     {
         sysReimburse.setCreateTime(DateUtils.getNowDate());
         return sysReimburseMapper.insertSysReimburse(sysReimburse);
-    }
-
-    @Override
-    public int createReimburse(ReimburseRequest reimburseRequest) {
-        SysReimburse reimburse = reimburseRequest.getReimburse();
-        int reimburseId = sysReimburseMapper.insertSysReimburse(reimburse);
-        reimburseRequest.getDetailList().forEach(detail -> {
-            detail.setReimburseId(Long.valueOf(reimburseId));
-            sysReimburseDetailService.save(detail);
-        });
-        reimburseRequest.getAttachmentList().forEach(attachment -> {
-            attachment.setReimburseId(Long.valueOf(reimburseId));
-            sysReimburseAttachmentService.save(attachment);
-        });
-        return 0;
     }
 
     /**
@@ -121,5 +125,22 @@ public class SysReimburseServiceImpl extends ServiceImpl<SysReimburseMapper,SysR
     public int deleteSysReimburseByReimburseId(Long reimburseId)
     {
         return sysReimburseMapper.deleteSysReimburseByReimburseId(reimburseId);
+    }
+
+    @Override
+    public int createReimburse(ReimburseRequest reimburseRequest) {
+        SysReimburse reimburse = reimburseRequest.getReimburse();
+        reimburse.setProcessStatus("DRAFT");
+        reimburse.setCreateBy(getUsername());
+        int res = sysReimburseMapper.insertSysReimburse(reimburse);
+        reimburseRequest.getDetailList().forEach(detail -> {
+            detail.setReimburseId(reimburse.getReimburseId());
+            sysReimburseDetailService.insertSysReimburseDetail(detail);
+        });
+        reimburseRequest.getAttachmentList().forEach(attachment -> {
+            attachment.setReimburseId(reimburse.getReimburseId());
+            sysReimburseAttachmentService.insertSysReimburseAttachment(attachment);
+        });
+        return res;
     }
 }

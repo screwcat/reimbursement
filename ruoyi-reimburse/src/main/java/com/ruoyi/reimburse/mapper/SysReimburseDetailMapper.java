@@ -1,6 +1,5 @@
 package com.ruoyi.reimburse.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.reimburse.domain.SysReimburseDetail;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -13,7 +12,7 @@ import java.util.List;
  * @date 2026-03-11
  */
 @Mapper
-public interface SysReimburseDetailMapper extends BaseMapper<SysReimburseDetail>
+public interface SysReimburseDetailMapper
 {
     /**
      * 查询报销费用明细

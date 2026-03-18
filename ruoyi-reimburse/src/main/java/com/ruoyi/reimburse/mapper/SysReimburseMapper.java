@@ -1,10 +1,8 @@
 package com.ruoyi.reimburse.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.ruoyi.reimburse.domain.SysReimburse;
-import org.apache.ibatis.annotations.Mapper;
-
 import java.util.List;
+
+import com.ruoyi.reimburse.domain.SysReimburse;
 
 /**
  * 报销申请单主Mapper接口
@@ -12,8 +10,7 @@ import java.util.List;
  * @author ruoyi
  * @date 2026-03-07
  */
-@Mapper
-public interface SysReimburseMapper extends BaseMapper<SysReimburse>
+public interface SysReimburseMapper
 {
     /**
      * 查询报销申请单主

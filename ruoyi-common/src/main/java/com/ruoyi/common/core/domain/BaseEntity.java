@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Entity基类
- *
+ * 
  * @author ruoyi
  */
 public class BaseEntity implements Serializable
@@ -37,8 +37,6 @@ public class BaseEntity implements Serializable
 
     /** 备注 */
     private String remark;
-
-    private String delFlag;
 
     /** 请求参数 */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -102,14 +100,6 @@ public class BaseEntity implements Serializable
     public void setRemark(String remark)
     {
         this.remark = remark;
-    }
-
-    public String getDelFlag() {
-        return delFlag;
-    }
-
-    public void setDelFlag(String delFlag) {
-        this.delFlag = delFlag;
     }
 
     public Map<String, Object> getParams()

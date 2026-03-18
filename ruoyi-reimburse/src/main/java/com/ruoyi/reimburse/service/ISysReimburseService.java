@@ -1,10 +1,9 @@
 package com.ruoyi.reimburse.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
+import java.util.List;
+
 import com.ruoyi.reimburse.domain.ReimburseRequest;
 import com.ruoyi.reimburse.domain.SysReimburse;
-
-import java.util.List;
 
 /**
  * 报销申请单主Service接口
@@ -12,7 +11,7 @@ import java.util.List;
  * @author ruoyi
  * @date 2026-03-07
  */
-public interface ISysReimburseService extends IService<SysReimburse>
+public interface ISysReimburseService
 {
     /**
      * 查询报销申请单主
@@ -21,6 +20,8 @@ public interface ISysReimburseService extends IService<SysReimburse>
      * @return 报销申请单主
      */
     public SysReimburse selectSysReimburseByReimburseId(Long reimburseId);
+
+    public ReimburseRequest getReimburseInfo(Long reimburseId);
 
     /**
      * 查询报销申请单主列表
@@ -37,9 +38,6 @@ public interface ISysReimburseService extends IService<SysReimburse>
      * @return 结果
      */
     public int insertSysReimburse(SysReimburse sysReimburse);
-
-
-    public int createReimburse(ReimburseRequest reimburseRequest);
 
     /**
      * 修改报销申请单主
@@ -64,4 +62,6 @@ public interface ISysReimburseService extends IService<SysReimburse>
      * @return 结果
      */
     public int deleteSysReimburseByReimburseId(Long reimburseId);
+
+    public int createReimburse(ReimburseRequest reimburseRequest);
 }

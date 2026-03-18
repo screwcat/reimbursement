@@ -5,8 +5,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.reimburse.domain.ReimburseRequest;
 import com.ruoyi.reimburse.domain.SysReimburse;
-import com.ruoyi.reimburse.domain.SysReimburseAttachment;
-import com.ruoyi.reimburse.domain.SysReimburseDetail;
 import com.ruoyi.reimburse.service.ISysReimburseService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +68,7 @@ public class SysReimburseController extends BaseController
     @GetMapping(value = "/{reimburseId}")
     public AjaxResult getInfo(@PathVariable("reimburseId") Long reimburseId)
     {
-        return success(sysReimburseService.selectSysReimburseByReimburseId(reimburseId));
+        return success(sysReimburseService.getReimburseInfo(reimburseId));
     }
 
     /**
@@ -82,14 +80,6 @@ public class SysReimburseController extends BaseController
     public AjaxResult add(@RequestBody SysReimburse sysReimburse)
     {
         return toAjax(sysReimburseService.insertSysReimburse(sysReimburse));
-    }
-
-//    @PreAuthorize("@ss.hasPermi('system:reimburse:add')")
-    @Log(title = "报销申请单主", businessType = BusinessType.INSERT)
-    @PostMapping("/addReimburse")
-    public AjaxResult addReimburse(@RequestBody ReimburseRequest reimburseRequest)
-    {
-        return toAjax(sysReimburseService.createReimburse(reimburseRequest));
     }
 
     /**
@@ -112,5 +102,12 @@ public class SysReimburseController extends BaseController
     public AjaxResult remove(@PathVariable Long[] reimburseIds)
     {
         return toAjax(sysReimburseService.deleteSysReimburseByReimburseIds(reimburseIds));
+    }
+
+    @Log(title = "报销申请单主", businessType = BusinessType.INSERT)
+    @PostMapping("/addReimburse")
+    public AjaxResult addReimburse(@RequestBody ReimburseRequest reimburseRequest)
+    {
+        return toAjax(sysReimburseService.createReimburse(reimburseRequest));
     }
 }

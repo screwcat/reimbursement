@@ -14,7 +14,9 @@
     <description>
         generator代码生成
     </description>
+
     <dependencies>
+
         <!-- velocity代码生成使用模板 -->
         <dependency>
             <groupId>org.apache.velocity</groupId>

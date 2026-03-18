@@ -226,7 +226,7 @@ export default {
       previewOpen: false,
       previewUrl: "",
       // 上传配置
-      uploadUrl: process.env.VUE_APP_BASE_API + "/system/reimburse/upload",
+      uploadUrl: process.env.VUE_APP_BASE_API + "/common/upload",
       uploadHeaders: {
         Authorization: "Bearer " + getToken(),
       },
@@ -322,10 +322,11 @@ export default {
     // 文件上传成功
     handleUploadSuccess(response, file) {
       this.attachmentList.push({
-        name: file.name,
-        url: response.data.filePath,
-        uid: file.uid,
-        response: response.data,
+        fileName: response.originalFilename,
+        filePath: response.fileName,
+        fileSize: file.size,
+        fileType: file.raw.type,
+        url: response.url,
       });
     },
     // 文件超出数量限制
@@ -338,12 +339,13 @@ export default {
         this.$refs.form.validate((valid) => {
           if (valid) {
             // 处理附件数据
+            console.log("处理附件数据");
             const attachments = this.attachmentList.map(item => {
               return {
-                fileName: item.response.fileName,
-                filePath: item.response.filePath,
-                fileSize: item.response.fileSize,
-                fileType: item.response.fileType,
+                fileName: item.fileName,
+                filePath: item.filePath,
+                fileSize: item.fileSize,
+                fileType: item.fileType,
               };
             });
             // 组装参数

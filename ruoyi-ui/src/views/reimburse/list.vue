@@ -297,6 +297,7 @@ export default {
     handleView(row) {
       this.viewOpen = true;
       this.viewReimburseId = row.reimburseId;
+      console.log("查看报销单ID：", row.reimburseId);
       this.$nextTick(() => {
         this.$refs.reimburseViewForm.initForm(row.reimburseId);
       });

@@ -59,18 +59,3 @@ spring:
                 wall:
                     config:
                         multi-statement-allow: true
-# MyBatis-Plus 配置（替换若依默认的 mybatis 配置）
-mybatis-plus:
-    # 实体类扫描包（若依的实体类通常在 domain 下）
-    type-aliases-package: com.ruoyi.**.domain
-    # Mapper XML 路径（若依默认在 resources/mapper 下，若你有 XML 需配置）
-    mapper-locations: classpath:mapper/**/*.xml
-    configuration:
-        # 开启下划线转驼峰（若依数据库字段通常是下划线命名）
-        map-underscore-to-camel-case: true
-        # 开启 SQL 日志（调试用）
-        log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-    global-config:
-        db-config:
-            # 主键策略（根据你的表选择，若依常用 AUTO 自增）
-            id-type: AUTO
