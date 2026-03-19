@@ -12,8 +12,10 @@ import com.ruoyi.reimburse.service.ISysReimburseDetailService;
 import com.ruoyi.reimburse.service.ISysReimburseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import static com.ruoyi.common.utils.SecurityUtils.getUsername;
+import static com.ruoyi.common.utils.SecurityUtils.*;
 
 /**
  * 报销申请单主Service业务层处理
@@ -70,9 +72,8 @@ public class SysReimburseServiceImpl implements ISysReimburseService
     @Override
     public List<SysReimburse> selectSysReimburseList(SysReimburse sysReimburse)
     {
-        String userName = getUsername();
-        if(userName != "admin"){
-            sysReimburse.setCreateBy(userName);
+        if(!isAdmin()&&!hasRole("finance")){
+            sysReimburse.setCreateBy(getUsername());
         }
         return sysReimburseMapper.selectSysReimburseList(sysReimburse);
     }
@@ -97,6 +98,7 @@ public class SysReimburseServiceImpl implements ISysReimburseService
      * @return 结果
      */
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public int updateSysReimburse(ReimburseRequest reimburseRequest)
     {
         SysReimburse sysReimburse = reimburseRequest.getReimburse();
@@ -132,6 +134,7 @@ public class SysReimburseServiceImpl implements ISysReimburseService
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public int createReimburse(ReimburseRequest reimburseRequest) {
         SysReimburse reimburse = reimburseRequest.getReimburse();
         reimburse.setProcessStatus("DRAFT");
@@ -156,5 +159,10 @@ public class SysReimburseServiceImpl implements ISysReimburseService
     @Override
     public int changeProcessState(Long reimburseId, String processState) {
         return sysReimburseMapper.changeProcessState(reimburseId, processState);
+    }
+
+    @Override
+    public int submitReimburse(Long reimburseId) {
+        return sysReimburseMapper.submitReimburse(reimburseId);
     }
 }

@@ -76,3 +76,10 @@ export function uploadAttachment(file) {
     data: file
   })
 }
+export function changeProcessState(data) {
+  return request({
+    url: '/reimburse/changeProcessState',
+    method: 'post',
+    data: data
+  })
+}

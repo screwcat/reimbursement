@@ -52,5 +52,5 @@ module.exports = {
   /**
    * 底部版权文本内容
    */
-  footerContent: 'Copyright © 2018-2026 RuoYi. All Rights Reserved.'
+  footerContent: '寻龙分金看缠山，一重缠山一重关，关门若有八重险，定有王侯埋此间。'
 }

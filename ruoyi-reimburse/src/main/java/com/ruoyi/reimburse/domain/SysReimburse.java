@@ -48,8 +48,8 @@ public class SysReimburse extends BaseEntity
     private BigDecimal totalAmount;
 
     /** 提交时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "提交时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "提交时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date submitTime;
 
     /** 流程状态：DRAFT-草稿，SUBMITTED-已提交，APPROVING-审批中，APPROVED-已审批，REJECTED-已驳回，CANCELED-已撤销 */
@@ -58,6 +58,8 @@ public class SysReimburse extends BaseEntity
 
     /** 删除标志（0代表存在 2代表删除） */
     private String delFlag;
+
+    private String nickName;
 
     public void setReimburseId(Long reimburseId)
     {
@@ -157,6 +159,15 @@ public class SysReimburse extends BaseEntity
     public String getDelFlag()
     {
         return delFlag;
+    }
+
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     @Override

@@ -20,16 +20,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
         <result property="delFlag"    column="del_flag"    />
+        <result property="nickName"    column="nick_name"    />
     </resultMap>
 
     <sql id="selectSysReimburseVo">
-        select sr.reimburse_id, bill_no, start_time, end_time, month_select, ticket_total, sum_amount total_amount, remark, submit_time, process_status, create_by, create_time, update_by, update_time, del_flag from sys_reimburse sr LEFT JOIN (SELECT reimburse_id,SUM(amount)sum_amount FROM sys_reimburse_detail GROUP BY reimburse_id)srd ON sr.reimburse_id = srd.reimburse_id
+        select sr.reimburse_id, bill_no, start_time, end_time, month_select, ticket_total, sum_amount total_amount, sr.remark, submit_time, process_status, sr.create_by, sr.create_time, sr.update_by, sr.update_time, sr.del_flag,nick_name from sys_reimburse sr LEFT JOIN (SELECT reimburse_id,SUM(amount)sum_amount FROM sys_reimburse_detail GROUP BY reimburse_id)srd ON sr.reimburse_id = srd.reimburse_id LEFT JOIN sys_user sy ON sr.create_by = sy.user_name
     </sql>
 
     <select id="selectSysReimburseList" parameterType="SysReimburse" resultMap="SysReimburseResult">
         <include refid="selectSysReimburseVo"/>
         <where>
-            <if test="billNo != null  and billNo != ''"> and sr.bill_no = #{billNo}</if>
+            <if test="billNo != null  and billNo != ''"> and sr.bill_no LIKE CONCAT('%', #{billNo}, '%')</if>
             <if test="startTime != null "> and sr.start_time = #{startTime}</if>
             <if test="endTime != null "> and sr.end_time = #{endTime}</if>
             <if test="monthSelect != null  and monthSelect != ''"> and sr.month_select = #{monthSelect}</if>
@@ -37,6 +38,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="totalAmount != null "> and sr.total_amount = #{totalAmount}</if>
             <if test="submitTime != null "> and sr.submit_time = #{submitTime}</if>
             <if test="processStatus != null  and processStatus != ''"> and sr.process_status = #{processStatus}</if>
+            <if test="createBy != null  and createBy != ''"> and sr.create_by = #{createBy}</if>
         </where>
         ORDER BY sr.create_time DESC
     </select>
@@ -116,5 +118,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <update id="changeProcessState">
         update sys_reimburse set process_status = #{processStatus} where reimburse_id = #{reimburseId}
+    </update>
+    <update id="submitReimburse">
+        update sys_reimburse set process_status = 'APPROVING',submit_time = NOW() where reimburse_id = #{reimburseId}
     </update>
 </mapper>

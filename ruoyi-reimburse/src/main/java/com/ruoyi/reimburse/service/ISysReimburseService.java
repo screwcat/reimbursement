@@ -66,4 +66,6 @@ public interface ISysReimburseService
     public int createReimburse(ReimburseRequest reimburseRequest);
 
     public int changeProcessState(Long reimburseId, String processState);
+
+    public int submitReimburse(Long reimburseId);
 }

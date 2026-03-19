@@ -7,25 +7,25 @@
   >
     <el-card title="基础信息" shadow="never">
       <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="开始时间" prop="startTime">
-            <el-date-picker
-              v-model="form.startTime"
-              type="datetime"
-              placeholder="请选择开始时间"
-              style="width: 100%"
-              :disabled="isView"
+        <el-col :span="10">    
+          <el-form-item label="提交人" prop="nickName" v-if="form.nickName!=undefined">
+            <el-input
+              v-model="form.nickName"
+              disabled
             />
           </el-form-item>
         </el-col>
-        <el-col :span="8">
-          <el-form-item label="结束时间" prop="endTime">
+        <el-col :span="16">
+          <el-form-item label="时间范围" prop="dateRange">
             <el-date-picker
-              v-model="form.endTime"
-              type="datetime"
-              placeholder="请选择结束时间"
+              v-model="form.dateRange"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
               style="width: 100%"
               :disabled="isView"
+              value-format="yyyy-MM-dd"
             />
           </el-form-item>
         </el-col>
@@ -230,7 +230,7 @@
 </template>
 
 <script>
-import { getReimburse, addReimburse, addReimComplete, updateReimburse } from "@/api/reimburse";
+import { getReimburse, addReimburse, addReimComplete, updateReimburse, changeProcessState } from "@/api/reimburse";
 import { getToken } from "@/utils/auth";
 
 export default {
@@ -248,13 +248,14 @@ export default {
   data() {
     return {
       form: {
-        startTime: null,
-        endTime: null,
+        dateRange: null, 
         monthSelect: null,
         ticketTotal: 0,
         totalAmount: 0.00,
         remark: "",
         reimburseId: null,
+        startTime: null,
+        endTime: null
       },
       detailList: [],
       attachmentList: [],
@@ -266,11 +267,27 @@ export default {
         Authorization: "Bearer " + getToken(),
       },
       rules: {
-        startTime: [{ required: true, message: "开始时间不能为空", trigger: "change" }],
-        endTime: [{ required: true, message: "结束时间不能为空", trigger: "change" }],
-        monthSelect: [{ required: true, message: "月度选择不能为空", trigger: "change" }],
-        ticketTotal: [{ required: true, message: "票据总数不能为空", trigger: "change" }],
-        totalAmount: [{ required: true, message: "总金额不能为空", trigger: "change" }],
+        // 校验时间范围
+        dateRange: [{ 
+          required: true, 
+          message: "时间范围不能为空", 
+          trigger: "change" 
+        }],
+        monthSelect: [{ 
+          required: true, 
+          message: "月度选择不能为空", 
+          trigger: "change" 
+        }],
+        ticketTotal: [{ 
+          required: true, 
+          message: "票据总数不能为空", 
+          trigger: "change" 
+        }],
+        totalAmount: [{ 
+          required: true, 
+          message: "总金额不能为空", 
+          trigger: "change" 
+        }],
       },
     };
   },
@@ -281,6 +298,18 @@ export default {
         this.calculateTotalAmount();
       },
       deep: true
+    },
+    'form.dateRange': {
+      handler(val) {
+        if (val && val.length === 2) {
+          this.form.startTime = val[0];
+          this.form.endTime = val[1];
+        } else {
+          this.form.startTime = null;
+          this.form.endTime = null;
+        }
+      },
+      immediate: true
     }
   },
   methods: {
@@ -300,7 +329,10 @@ export default {
           const data = response.data;
           this.form = {
             ...data.reimburse,
-            totalAmount: data.reimburse.totalAmount || 0.00
+            totalAmount: data.reimburse.totalAmount || 0.00,
+            dateRange: data.reimburse.startTime && data.reimburse.endTime 
+              ? [data.reimburse.startTime, data.reimburse.endTime] 
+              : null
           };
           this.detailList = data.detailList || [];
           this.form.ticketTotal = this.detailList.length;
@@ -316,13 +348,14 @@ export default {
 
     resetForm() {
       this.form = {
-        startTime: null,
-        endTime: null,
+        dateRange: null,
         monthSelect: null,
         ticketTotal: 0,
         totalAmount: 0.00,
         remark: "",
         reimburseId: null,
+        startTime: null,
+        endTime: null
       };
       this.detailList = [];
       this.attachmentList = [];
@@ -359,7 +392,8 @@ export default {
         ticketDate: '票据日期',
         amount: '款项金额',
         accommodation: '住宿地点',
-        totalAmount: '总金额'
+        totalAmount: '总金额',
+        dateRange: '时间范围'
       };
       return fieldMap[field] || field;
     },
@@ -448,7 +482,6 @@ export default {
       this.previewUrl = file.url;
       this.previewOpen = true;
     },
-
     // handlePictureCardPreview(file) {
     //   // 1. 校验 URL 有效性
     //   if (!file.url) {
@@ -466,7 +499,6 @@ export default {
     //   };
     //   img.src = file.url; // 触发图片预加载
     // },
-
     handleRemove(file) {
       const index = this.attachmentList.findIndex(item => item.uid === file.uid);
       if (index > -1) {
@@ -513,6 +545,11 @@ export default {
                 fileType: item.fileType,
               };
             });
+            if (this.form.dateRange && this.form.dateRange.length === 2) {
+              this.form.startTime = this.form.dateRange[0];
+              this.form.endTime = this.form.dateRange[1];
+            }
+            
             const params = {
               reimburse: this.form,
               detailList: this.detailList,
@@ -537,6 +574,44 @@ export default {
             reject("表单校验失败");
           }
         });
+      });
+    },
+    reviewApprove() {
+      return new Promise((resolve, reject) => {
+        const params = {
+              reimburseId: this.form.reimburseId,
+              processState: "APPROVED",
+            };
+        try {
+          changeProcessState(params).then(() => {
+                this.$modal.msgSuccess("审核通过!");
+                resolve();
+              }).catch(error => {
+                reject(error);
+              });
+        } catch (error) {
+            this.$modal.msgError("审核操作失败");
+            reject(error);
+        }
+      });
+    },
+    reviewReject() {
+      return new Promise((resolve, reject) => {
+        const params = {
+              reimburseId: this.form.reimburseId,
+              processState: "REJECTED",
+            };
+        try {
+          changeProcessState(params).then(() => {
+                this.$modal.msgSuccess("审核拒绝!");
+                resolve();
+              }).catch(error => {
+                reject(error);
+              });
+        } catch (error) {
+            this.$modal.msgError("审核操作失败");
+            reject(error);
+        }
       });
     },
   },

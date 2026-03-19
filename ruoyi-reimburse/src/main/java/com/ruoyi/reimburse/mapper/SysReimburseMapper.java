@@ -62,4 +62,6 @@ public interface SysReimburseMapper
     public int deleteSysReimburseByReimburseIds(Long[] reimburseIds);
 
     public int changeProcessState(@Param("reimburseId")Long reimburseId, @Param("processStatus")String processStatus);
+
+    public int submitReimburse(Long reimburseId);
 }

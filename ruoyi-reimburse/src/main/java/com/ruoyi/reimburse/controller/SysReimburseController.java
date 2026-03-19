@@ -1,6 +1,7 @@
 package com.ruoyi.reimburse.controller;
 
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.reimburse.domain.ReimburseRequest;
@@ -111,19 +112,25 @@ public class SysReimburseController extends BaseController
         return toAjax(sysReimburseService.createReimburse(reimburseRequest));
     }
 
-    @Log(title = "提交申请单", businessType = BusinessType.UPDATE)
+    @Log(title = "提交审核", businessType = BusinessType.UPDATE)
     @PostMapping("/submit/{reimburseId}")
     public AjaxResult submit(@PathVariable Long reimburseId)
     {
-        return toAjax(sysReimburseService.changeProcessState(reimburseId,"APPROVING"));
+        return toAjax(sysReimburseService.submitReimburse(reimburseId));
     }
 
-    @Log(title = "提交申请单", businessType = BusinessType.UPDATE)
+    @Log(title = "撤销申请", businessType = BusinessType.UPDATE)
     @PostMapping("/cancel/{reimburseId}")
     public AjaxResult cancel(@PathVariable Long reimburseId)
     {
         return toAjax(sysReimburseService.changeProcessState(reimburseId,"DRAFT"));
     }
 
+    @Log(title = "更改审核状态", businessType = BusinessType.INSERT)
+    @PostMapping("/changeProcessState")
+    public AjaxResult changeProcessState(@RequestBody Map<String, Object> sysReimburse)
+    {
+        return toAjax(sysReimburseService.changeProcessState(((Number)sysReimburse.get("reimburseId")).longValue(),sysReimburse.get("processState").toString()));
+    }
 
 }

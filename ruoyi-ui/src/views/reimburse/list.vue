@@ -10,20 +10,23 @@
         />
       </el-form-item>
       <el-form-item label="月度选择" prop="monthSelect">
-        <el-input
+        <el-date-picker
           v-model="queryParams.monthSelect"
-          placeholder="请输入月度(如2024-05)"
-          clearable
+          type="month"
+          placeholder="请选择月度"
+          format="yyyy-MM"
+          value-format="yyyy-MM"
+          style="width: 100%"
         />
       </el-form-item>
       <el-form-item label="流程状态" prop="processStatus">
         <el-select v-model="queryParams.processStatus" placeholder="请选择流程状态" clearable>
           <el-option label="草稿" value="DRAFT" />
-          <el-option label="已提交" value="SUBMITTED" />
+          <!-- <el-option label="已提交" value="SUBMITTED" /> -->
           <el-option label="审批中" value="APPROVING" />
           <el-option label="已审批" value="APPROVED" />
           <el-option label="已驳回" value="REJECTED" />
-          <el-option label="已撤销" value="CANCELED" />
+          <!-- <el-option label="已撤销" value="CANCELED" /> -->
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -75,14 +78,15 @@
     >
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="单据编号" align="center" prop="billNo" />
+      <el-table-column label="提交人" align="center" prop="nickName" />
       <el-table-column label="开始时间" align="center" prop="startTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="结束时间" align="center" prop="endTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="票据总数" align="center" prop="ticketTotal" />
@@ -107,9 +111,9 @@
           <el-tag v-else-if="scope.row.processStatus === 'CANCELED'" type="gray">已撤销</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createTime" width="180">
+      <el-table-column label="提交时间" align="center" prop="submitTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          <span>{{ parseTime(scope.row.submitTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -126,8 +130,8 @@
             type="text"
             icon="el-icon-edit"
             @click="handleEdit(scope.row)"
+            v-if="scope.row.processStatus === 'DRAFT' || scope.row.processStatus === 'REJECTED'"
             v-hasPermi="['system:reimburse:edit']"
-            v-if="scope.row.processStatus === 'DRAFT'"
           >修改</el-button>
           <el-button
             size="mini"
@@ -135,7 +139,7 @@
             icon="el-icon-circle-check"
             @click="handleSubmit(scope.row)"
             v-hasPermi="['system:reimburse:submit']"
-            v-if="scope.row.processStatus === 'DRAFT'"
+            v-if="scope.row.processStatus === 'DRAFT' || scope.row.processStatus === 'REJECTED'"
           >提交审批</el-button>
           <el-button
             size="mini"
@@ -151,7 +155,7 @@
             icon="el-icon-delete"
             @click="handleDeleteOne(scope.row)"
             v-hasPermi="['system:reimburse:remove']"
-            v-if="scope.row.processStatus === 'DRAFT' || scope.row.processStatus === 'CANCELED'"
+            v-if="scope.row.processStatus === 'DRAFT' || scope.row.processStatus === 'CANCELED' || scope.row.processStatus === 'REJECTED'"
           >删除</el-button>
         </template>
       </el-table-column>
@@ -178,7 +182,7 @@
         :reimburse-id="reimburseId"
       />
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm" v-if="!isView">确 定</el-button>
+        <el-button type="primary" @click="submitForm" v-if="!isView" v-hasPermi="['system:reimburse:edit']">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
@@ -196,6 +200,8 @@
         :reimburse-id="viewReimburseId"
       />
       <div slot="footer" class="dialog-footer">
+        <el-button type="success" @click="reviewApprove" v-if="isReview" v-hasPermi="['system:reimburse:review']">审核通过</el-button>
+        <el-button type="warning" @click="reviewReject" v-if="isReview" v-hasPermi="['system:reimburse:review']">审核拒绝</el-button>
         <el-button @click="viewOpen = false">关 闭</el-button>
       </div>
     </el-dialog>
@@ -227,6 +233,8 @@ export default {
       viewOpen: false,
       // 是否为查看模式
       isView: false,
+      // 是否为审核模式
+      isReview: false,
       // 报销单ID
       reimburseId: null,
       viewReimburseId: null,
@@ -297,6 +305,7 @@ export default {
     handleView(row) {
       this.viewOpen = true;
       this.viewReimburseId = row.reimburseId;
+      this.isReview = row.processStatus === 'APPROVING'
       console.log("查看报销单ID：", row.reimburseId);
       this.$nextTick(() => {
         this.$refs.reimburseViewForm.initForm(row.reimburseId);
@@ -356,6 +365,18 @@ export default {
     submitForm() {
       this.$refs.reimburseForm.submitForm().then(() => {
         this.open = false;
+        this.getList();
+      });
+    },
+    reviewApprove() {
+      this.$refs.reimburseViewForm.reviewApprove().then(() => {
+        this.viewOpen = false;
+        this.getList();
+      });
+    },
+    reviewReject() {
+      this.$refs.reimburseViewForm.reviewReject().then(() => {
+        this.viewOpen = false;
         this.getList();
       });
     },
