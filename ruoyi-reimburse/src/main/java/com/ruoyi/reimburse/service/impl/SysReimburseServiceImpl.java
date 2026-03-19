@@ -93,13 +93,17 @@ public class SysReimburseServiceImpl implements ISysReimburseService
     /**
      * 修改报销申请单主
      *
-     * @param sysReimburse 报销申请单主
+     * @param reimburseRequest 报销申请单主
      * @return 结果
      */
     @Override
-    public int updateSysReimburse(SysReimburse sysReimburse)
+    public int updateSysReimburse(ReimburseRequest reimburseRequest)
     {
+        SysReimburse sysReimburse = reimburseRequest.getReimburse();
         sysReimburse.setUpdateTime(DateUtils.getNowDate());
+        sysReimburseDetailService.deleteSysReimburseDetailByReimburseId(sysReimburse.getReimburseId());
+        sysReimburseAttachmentService.deleteSysReimburseAttachmentByReimburseId(sysReimburse.getReimburseId());
+        createDtl(reimburseRequest,sysReimburse.getReimburseId());
         return sysReimburseMapper.updateSysReimburse(sysReimburse);
     }
 
@@ -133,14 +137,24 @@ public class SysReimburseServiceImpl implements ISysReimburseService
         reimburse.setProcessStatus("DRAFT");
         reimburse.setCreateBy(getUsername());
         int res = sysReimburseMapper.insertSysReimburse(reimburse);
+        createDtl(reimburseRequest,reimburse.getReimburseId());
+        return res;
+    }
+
+    public void createDtl(ReimburseRequest reimburseRequest,Long reimburseId) {
+        SysReimburse reimburse = reimburseRequest.getReimburse();
         reimburseRequest.getDetailList().forEach(detail -> {
-            detail.setReimburseId(reimburse.getReimburseId());
+            detail.setReimburseId(reimburseId);
             sysReimburseDetailService.insertSysReimburseDetail(detail);
         });
         reimburseRequest.getAttachmentList().forEach(attachment -> {
-            attachment.setReimburseId(reimburse.getReimburseId());
+            attachment.setReimburseId(reimburseId);
             sysReimburseAttachmentService.insertSysReimburseAttachment(attachment);
         });
-        return res;
+     }
+
+    @Override
+    public int changeProcessState(Long reimburseId, String processState) {
+        return sysReimburseMapper.changeProcessState(reimburseId, processState);
     }
 }

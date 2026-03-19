@@ -61,4 +61,6 @@ public interface SysReimburseDetailMapper
      * @return 结果
      */
     public int deleteSysReimburseDetailByDetailIds(Long[] detailIds);
+
+    public int deleteSysReimburseDetailByReimburseId(Long reimburseId);
 }

@@ -83,6 +83,11 @@ public class SysReimburseDetailServiceImpl implements ISysReimburseDetailService
         return sysReimburseDetailMapper.deleteSysReimburseDetailByDetailIds(detailIds);
     }
 
+    @Override
+    public int deleteSysReimburseDetailByReimburseId(Long reimburseId) {
+        return sysReimburseDetailMapper.deleteSysReimburseDetailByReimburseId(reimburseId);
+    }
+
     /**
      * 删除报销费用明细信息
      *

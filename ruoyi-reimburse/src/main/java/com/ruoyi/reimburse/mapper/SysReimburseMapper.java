@@ -3,6 +3,7 @@ package com.ruoyi.reimburse.mapper;
 import java.util.List;
 
 import com.ruoyi.reimburse.domain.SysReimburse;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 报销申请单主Mapper接口
@@ -59,4 +60,6 @@ public interface SysReimburseMapper
      * @return 结果
      */
     public int deleteSysReimburseByReimburseIds(Long[] reimburseIds);
+
+    public int changeProcessState(@Param("reimburseId")Long reimburseId, @Param("processStatus")String processStatus);
 }

@@ -81,4 +81,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{attachmentId}
         </foreach>
     </delete>
+    <delete id="deleteSysReimburseAttachmentByReimburseId">
+        delete from sys_reimburse_attachment where reimburse_id = #{reimburseId}
+    </delete>
 </mapper>

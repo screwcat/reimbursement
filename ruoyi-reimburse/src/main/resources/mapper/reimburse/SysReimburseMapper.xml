@@ -38,11 +38,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="submitTime != null "> and sr.submit_time = #{submitTime}</if>
             <if test="processStatus != null  and processStatus != ''"> and sr.process_status = #{processStatus}</if>
         </where>
+        ORDER BY sr.create_time DESC
     </select>
 
     <select id="selectSysReimburseByReimburseId" parameterType="Long" resultMap="SysReimburseResult">
         <include refid="selectSysReimburseVo"/>
-        where reimburse_id = #{reimburseId}
+        where sr.reimburse_id = #{reimburseId}
     </select>
 
     <insert id="insertSysReimburse" parameterType="SysReimburse" useGeneratedKeys="true" keyProperty="reimburseId">
@@ -112,4 +113,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{reimburseId}
         </foreach>
     </delete>
+
+    <update id="changeProcessState">
+        update sys_reimburse set process_status = #{processStatus} where reimburse_id = #{reimburseId}
+    </update>
 </mapper>

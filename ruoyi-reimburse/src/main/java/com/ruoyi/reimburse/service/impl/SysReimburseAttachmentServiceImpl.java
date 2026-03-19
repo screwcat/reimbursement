@@ -93,4 +93,11 @@ public class SysReimburseAttachmentServiceImpl implements ISysReimburseAttachmen
     {
         return sysReimburseAttachmentMapper.deleteSysReimburseAttachmentByAttachmentId(attachmentId);
     }
+
+    @Override
+    public int deleteSysReimburseAttachmentByReimburseId(Long reimburseId) {
+        return sysReimburseAttachmentMapper.deleteSysReimburseAttachmentByReimburseId(reimburseId);
+    }
+
+
 }

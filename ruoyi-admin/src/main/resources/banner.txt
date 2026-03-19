@@ -1,24 +1,38 @@
 Application Version: ${ruoyi.version}
 Spring Boot Version: ${spring-boot.version}
-////////////////////////////////////////////////////////////////////
-//                          _ooOoo_                               //
-//                         o8888888o                              //
-//                         88" . "88                              //
-//                         (| ^_^ |)                              //
-//                         O\  =  /O                              //
-//                      ____/`---'\____                           //
-//                    .'  \\|     |//  `.                         //
-//                   /  \\|||  :  |||//  \                        //
-//                  /  _||||| -:- |||||-  \                       //
-//                  |   | \\\  -  /// |   |                       //
-//                  | \_|  ''\---/''  |   |                       //
-//                  \  .-\__  `-`  ___/-. /                       //
-//                ___`. .'  /--.--\  `. . ___                     //
-//              ."" '<  `.___\_<|>_/___.'  >'"".                  //
-//            | | :  `- \`.;`\ _ /`;.`/ - ` : | |                 //
-//            \  \ `-.   \_ __\ /__ _/   .-` /  /                 //
-//      ========`-.____`-.___\_____/___.-`____.-'========         //
-//                           `=---='                              //
-//      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        //
-//             佛祖保佑       永不宕机      永无BUG               //
-////////////////////////////////////////////////////////////////////
+@@@@@OOOO\.*********************************],\*\/oooo`*OOOOOOOOOOOOOOOO
+@@@@@@@OOO^.*****************************,*.`./OOOOoo/.OOOOOOOOOOOOOOOOO
+@@@@@@@@OOO..****]]....******************,**OOO@@OOOo*=OOOOOOOOOOOOOOOOO
+@@@@@@@@@OO^.**/OOOOO`.******.  .**********OOOO@@@OO^*=OOOOOOOOOOOOOOOOO
+@@@@@@@@@OO^..=OOOOOOOO.*****.     ......*,OOOO@@@@O^.OOOOOOOOOOOOOOOOOO
+@@@@@@@@@OOo..=OOOOOOOO`.                   ..[[O@O^^.OOOOOOOOOOOOOOOOOO
+@@@@@@@@@OOO..*.\OOO[`                          ......\OOOOOOOOO@OOOOOOO
+@@@@@@@@OOOO...                                    .....,\OOOOO@@OOOOOOO
+@@@@@@@@@OO/`                                       ........[\O@@OOOOOOO
+@@@@@@@@@/                                         ......**...\O@@@@@@@O
+@@@@@@O[                                        ,]].......****=oO@@@@@O@
+@@@@@`                                      ,/OOOOOO@O`...*,oooooO@@@@@@
+@@@/                ...                  ,/OO@@@@@@@@O@\...*,[[ooOO@@@@@
+@@/`           ,/OOOOOOOOOOOO]         .OO@@OO[\@@@@OOOO\....**oooO@@@@@
+@@\.         .OOOOOOOOOOOOOOOOO`       =@@O      ,@@@@OOO`.....*]oO@@@@@
+@O\          /OOOOOOO/   .  ,OOO       =O@. \/O^ .=@OOOOO`.....**ooO@@@@
+@@\.        .OOOOOOOO   OOO^ =O`       .\O\ ,\[ ./@OOOOOO`  ...*=ooO@@@@
+@@O          ,OOOOOOOO`  [`,//          ..OOOOOOOOOOOOOOo.  ...*=ooO@@@@
+@OO.          ,oOOOOOOOOOOOO`           ...,O@OOOOOOOOO/.  ...**oooO@@@@
+@OO`           .\oOOOOOOOOO              ..=oOOOOOOOOO^.  ....**oooO@@@@
+OOO^             .,\OOOOO`              ./O`\[[OOO/[..   ....*=ooooO@@@@
+O@@O^                       =OOOo\]/OOOO@@@/o\`.       ....*,]/oooo@@@@@
+OOOO\.                       \OOOOOOOO@@@@/.=**..    ....***/oooooO@@@@@
+OOOOO\..                       ,\OOOOOO[...*^\*........****=oooooO@@@@@@
+OOOOOOO`.                          ..  ...*o^***......***/ooooooO@@@@@@@
+OOOOOOOO^.                      ..`.]]]/**],`*********=**oo\ooo@@@@@@@@@
+OOOOOOOOOO`.                   =OOOOOOOoO`**,,/********ooooooO@@@@@@@@@@
+OOOOOOOOOO@O`.............     .\oooooOOO\`,oooo\]*/oooooooO@@@@@@@@@@@@
+OOOOOOOOOOOO@O`*...........  ....,[OOOoooo`*/ooooooooooooO@@@@@@@@@@@@@@
+OOOOOOOOOOOO@@@OO\`******..............***/ooooooooooooO@@@@@@@@@@@@@@@@
+OOOOOOOOOOO@@@@@@@OOo`]*****.........**/ooooooooooooOO@@@@@@@@@@@@@@@@@@
+OOOOOOOOOO@@@@@@@@@@@@Oo`***=ooo]ooooooooooooooooOO@@@@@@@@@@@@@@@@@@@@@
+OOOOOOOOOOOOO@@@@@@@@@@@@@OOo/o\OOOOOOOOoooOOO@@@@@@@@@@@@@@@@@@@@@@@@@@
+OOOOooooooOOOOOOOOOOOOOOOO@@@@@@@OOOOOO@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+oo[`..                .....,[[[OOOOO@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                                 .....*,[[oooooooOOOO@@@@@@@@@@@@@@@@@@@

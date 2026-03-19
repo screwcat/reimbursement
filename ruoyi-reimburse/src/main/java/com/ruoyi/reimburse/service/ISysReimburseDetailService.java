@@ -52,6 +52,8 @@ public interface ISysReimburseDetailService
      */
     public int deleteSysReimburseDetailByDetailIds(Long[] detailIds);
 
+    public int deleteSysReimburseDetailByReimburseId(Long reimburseId);
+
     /**
      * 删除报销费用明细信息
      *

@@ -45,7 +45,7 @@ public interface ISysReimburseService
      * @param sysReimburse 报销申请单主
      * @return 结果
      */
-    public int updateSysReimburse(SysReimburse sysReimburse);
+    public int updateSysReimburse(ReimburseRequest reimburseRequest);
 
     /**
      * 批量删除报销申请单主
@@ -64,4 +64,6 @@ public interface ISysReimburseService
     public int deleteSysReimburseByReimburseId(Long reimburseId);
 
     public int createReimburse(ReimburseRequest reimburseRequest);
+
+    public int changeProcessState(Long reimburseId, String processState);
 }

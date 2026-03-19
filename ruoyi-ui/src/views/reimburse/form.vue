@@ -5,7 +5,6 @@
     :rules="rules"
     label-width="120px"
   >
-    <!-- 基础信息 -->
     <el-card title="基础信息" shadow="never">
       <el-row :gutter="20">
         <el-col :span="8">
@@ -47,8 +46,19 @@
           <el-form-item label="票据总数" prop="ticketTotal">
             <el-input
               v-model="form.ticketTotal"
-              placeholder="请输入票据总数"
-              :disabled="isView"
+              placeholder="票据总数自动计算"
+              disabled
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="总金额" prop="totalAmount">
+            <el-input
+              v-model="form.totalAmount"
+              placeholder="总金额自动计算"
+              disabled
+              type="number"
+              precision="2"
             />
           </el-form-item>
         </el-col>
@@ -65,10 +75,9 @@
         </el-col>
       </el-row>
     </el-card>
-
-    <!-- 费用明细 -->
     <el-card title="报销费用明细" shadow="never" style="margin-top: 10px;">
       <el-table
+        ref="detailTable"
         :data="detailList"
         border
         style="width: 100%; margin-bottom: 10px;"
@@ -77,11 +86,17 @@
         <el-table-column type="selection" width="55" align="center" v-if="!isView" />
         <el-table-column label="票据类型" align="center" prop="ticketType">
           <template slot-scope="scope">
-            <el-input
+            <el-select
               v-model="scope.row.ticketType"
-              placeholder="请输入票据类型"
+              placeholder="请选择票据类型"
+              style="width: 100%"
               :disabled="isView"
-            />
+            >
+              <el-option label="交通" value="交通" />
+              <el-option label="办公用品" value="办公用品" />
+              <el-option label="餐饮" value="餐饮" />
+              <el-option label="其他" value="其他" />
+            </el-select>
           </template>
         </el-table-column>
         <el-table-column label="票据张数" align="center" prop="ticketNum">
@@ -91,6 +106,7 @@
               type="number"
               placeholder="请输入张数"
               :disabled="isView"
+              @change="calculateTotalAmount"
             />
           </template>
         </el-table-column>
@@ -131,6 +147,7 @@
               placeholder="请输入金额"
               :disabled="isView"
               precision="2"
+              @change="calculateTotalAmount"
             />
           </template>
         </el-table-column>
@@ -160,7 +177,6 @@
       >删除选中</el-button>
     </el-card>
 
-    <!-- 票据影像 -->
     <el-card title="票据影像" shadow="never" style="margin-top: 10px;">
       <el-upload
         ref="upload"
@@ -178,8 +194,34 @@
         <div slot="tip" class="el-upload__tip">
           请上传jpg/png格式的图片，单张图片不超过5MB，最多上传10张
         </div>
+        <template slot="file" slot-scope="{file}">
+          <div class="el-upload-list__item">
+            <img class="el-upload-list__item-thumbnail" :src="file.url" alt="" />
+            <span class="el-upload-list__item-actions">
+              <span
+                class="el-upload-list__item-preview"
+                @click="handlePictureCardPreview(file)"
+              >
+                <i class="el-icon-zoom-in"></i>
+              </span>
+              <span
+                v-if="!isView"
+                class="el-upload-list__item-delete"
+                @click="handleDownload(file)"
+              >
+                <i class="el-icon-download"></i>
+              </span>
+              <span
+                v-if="!isView"
+                class="el-upload-list__item-delete"
+                @click="handleRemove(file)"
+              >
+                <i class="el-icon-delete"></i>
+              </span>
+            </span>
+          </div>
+        </template>
       </el-upload>
-      <!-- 预览 -->
       <el-dialog :visible.sync="previewOpen" title="图片预览" width="80%">
         <img :src="previewUrl" style="width: 100%;" />
       </el-dialog>
@@ -194,12 +236,10 @@ import { getToken } from "@/utils/auth";
 export default {
   name: "ReimburseForm",
   props: {
-    // 是否为查看模式
     isView: {
       type: Boolean,
       default: false,
     },
-    // 报销单ID
     reimburseId: {
       type: [Number, String, null],
       default: null,
@@ -207,79 +247,128 @@ export default {
   },
   data() {
     return {
-      // 表单数据
       form: {
         startTime: null,
         endTime: null,
         monthSelect: null,
-        ticketTotal: null,
+        ticketTotal: 0,
+        totalAmount: 0.00,
         remark: "",
         reimburseId: null,
       },
-      // 明细列表
       detailList: [],
-      // 附件列表
       attachmentList: [],
-      // 选中的明细ID
-      detailIds: [],
-      // 预览弹窗
+      selectedDetailRows: [],
       previewOpen: false,
       previewUrl: "",
-      // 上传配置
       uploadUrl: process.env.VUE_APP_BASE_API + "/common/upload",
       uploadHeaders: {
         Authorization: "Bearer " + getToken(),
       },
-      // 表单校验规则
       rules: {
         startTime: [{ required: true, message: "开始时间不能为空", trigger: "change" }],
         endTime: [{ required: true, message: "结束时间不能为空", trigger: "change" }],
         monthSelect: [{ required: true, message: "月度选择不能为空", trigger: "change" }],
-        ticketTotal: [{ required: true, message: "票据总数不能为空", trigger: "blur" },],
+        ticketTotal: [{ required: true, message: "票据总数不能为空", trigger: "change" }],
+        totalAmount: [{ required: true, message: "总金额不能为空", trigger: "change" }],
       },
     };
   },
+  watch: {
+    detailList: {
+      handler(newList) {
+        this.form.ticketTotal = newList.length;
+        this.calculateTotalAmount();
+      },
+      deep: true
+    }
+  },
   methods: {
-    // 初始化表单
+    calculateTotalAmount() {
+      let total = 0;
+      this.detailList.forEach(row => {
+        const amount = Number(row.amount) || 0;
+        total += amount;
+      });
+      this.form.totalAmount = Number(total.toFixed(2));
+    },
+
     initForm(reimburseId) {
       this.resetForm();
       if (reimburseId) {
         getReimburse(reimburseId).then((response) => {
           const data = response.data;
-          this.form = data.reimburse;
+          this.form = {
+            ...data.reimburse,
+            totalAmount: data.reimburse.totalAmount || 0.00
+          };
           this.detailList = data.detailList || [];
-          // 处理附件列表格式
-          this.attachmentList = (data.attachmentList || []).map(item => {
-            return {
-              name: item.fileName,
-              url: item.filePath,
-              uid: item.attachmentId,
-              response: {
-                filePath: item.filePath,
-                fileName: item.fileName,
-                fileSize: item.fileSize,
-                fileType: item.fileType,
-              },
-            };
-          });
+          this.form.ticketTotal = this.detailList.length;
+          this.calculateTotalAmount();
+          this.attachmentList = (data.attachmentList || []).map((item, index) => ({
+            ...item,
+            url: item.filePath,
+            name: item.fileName,
+          }));
         });
       }
     },
-    // 重置表单
+
     resetForm() {
       this.form = {
         startTime: null,
         endTime: null,
         monthSelect: null,
-        ticketTotal: null,
+        ticketTotal: 0,
+        totalAmount: 0.00,
         remark: "",
         reimburseId: null,
       };
       this.detailList = [];
       this.attachmentList = [];
+      this.selectedDetailRows = [];
     },
-    // 添加明细
+
+    validateLastDetailRow() {
+      if (this.detailList.length === 0) return true;
+      const lastRow = this.detailList[this.detailList.length - 1];
+      const requiredFields = [
+        'ticketType', 'ticketNum', 'startPlace', 
+        'endPlace', 'ticketDate', 'amount'
+      ];
+      for (const field of requiredFields) {
+        const value = lastRow[field];
+        if (value === "" || value === null || value === undefined) {
+          this.$modal.msgWarning(`请先填写完最后一行明细的【${this.getFieldName(field)}】字段`);
+          return false;
+        }
+        if ((field === 'ticketNum' || field === 'amount') && isNaN(Number(value))) {
+          this.$modal.msgWarning(`请填写有效的【${this.getFieldName(field)}】数字`);
+          return false;
+        }
+      }
+      return true;
+    },
+
+    getFieldName(field) {
+      const fieldMap = {
+        ticketType: '票据类型',
+        ticketNum: '票据张数',
+        startPlace: '起始地',
+        endPlace: '目的地',
+        ticketDate: '票据日期',
+        amount: '款项金额',
+        accommodation: '住宿地点',
+        totalAmount: '总金额'
+      };
+      return fieldMap[field] || field;
+    },
+
     addDetail() {
+      if (!this.validateLastDetailRow()) {
+        return;
+      }
+      
       this.detailList.push({
         ticketType: "",
         ticketNum: null,
@@ -292,20 +381,41 @@ export default {
         reimburseId: this.reimburseId,
       });
     },
-    // 删除明细
+
     delDetail() {
-      if (this.detailIds.length === 0) {
-        this.$modal.msgWarning("请选择要删除的明细");
+      if (this.selectedDetailRows.length === 0) {
+        this.$modal.msgWarning("请选择要删除的明细行");
         return;
       }
-      this.detailList = this.detailList.filter(item => !this.detailIds.includes(item.detailId));
-      this.detailIds = [];
+      
+      this.$modal.confirm('此操作将永久删除选中的明细行, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const selectedIds = this.selectedDetailRows.map(row => {
+          return row.detailId || this.detailList.indexOf(row);
+        });
+        this.detailList = this.detailList.filter(row => {
+          const rowId = row.detailId || this.detailList.indexOf(row);
+          return !selectedIds.includes(rowId);
+        });
+
+        this.selectedDetailRows = [];
+        if (this.$refs.detailTable) {
+          this.$refs.detailTable.clearSelection();
+        }
+        
+        this.$modal.msgSuccess("删除成功");
+      }).catch(() => {
+        this.$modal.msgInfo("已取消删除");
+      });
     },
-    // 明细多选
+
     handleDetailSelectionChange(val) {
-      this.detailIds = val.map(item => item.detailId);
+      this.selectedDetailRows = val;
     },
-    // 文件上传前校验
+
     beforeUpload(file) {
       const isJPG = file.type === "image/jpeg" || file.type === "image/png";
       const isLt5M = file.size / 1024 / 1024 < 5;
@@ -319,7 +429,7 @@ export default {
       }
       return true;
     },
-    // 文件上传成功
+
     handleUploadSuccess(response, file) {
       this.attachmentList.push({
         fileName: response.originalFilename,
@@ -329,16 +439,71 @@ export default {
         url: response.url,
       });
     },
-    // 文件超出数量限制
+
     handleExceed(files, fileList) {
       this.$modal.msgError(`最多只能上传10张图片`);
     },
-    // 提交表单
+
+    handlePictureCardPreview(file) {
+      this.previewUrl = file.url;
+      this.previewOpen = true;
+    },
+
+    // handlePictureCardPreview(file) {
+    //   // 1. 校验 URL 有效性
+    //   if (!file.url) {
+    //     this.$modal.msgError("图片预览地址无效");
+    //     return;
+    //   }
+    //   // 2. 先预加载图片，避免弹窗空白
+    //   const img = new Image();
+    //   img.onload = () => {
+    //     this.previewUrl = file.url;
+    //     this.previewOpen = true; // 图片加载完成后再打开弹窗
+    //   };
+    //   img.onerror = () => {
+    //     this.$modal.msgError("图片加载失败，请检查图片地址");
+    //   };
+    //   img.src = file.url; // 触发图片预加载
+    // },
+
+    handleRemove(file) {
+      const index = this.attachmentList.findIndex(item => item.uid === file.uid);
+      if (index > -1) {
+        this.attachmentList.splice(index, 1);
+      }
+    },
+    handleDownload(file) {
+      const link = document.createElement("a");
+      link.href = file.url;
+      link.download = file.name || file.fileName;
+      link.click();
+    },
+
     submitForm() {
       return new Promise((resolve, reject) => {
         this.$refs.form.validate((valid) => {
           if (valid) {
-            // 处理附件数据
+            const allValid = this.detailList.every(row => {
+              const requiredFields = ['ticketType', 'ticketNum', 'startPlace', 'endPlace', 'ticketDate', 'amount'];
+              for (const field of requiredFields) {
+                const value = row[field];
+                if (value === "" || value === null || value === undefined || 
+                    ((field === 'ticketNum' || field === 'amount') && isNaN(Number(value)))) {
+                  this.$modal.msgWarning(`存在未填写完整的明细行，请检查【${this.getFieldName(field)}】字段`);
+                  return false;
+                }
+              }
+              return true;
+            });
+            
+            if (!allValid) {
+              reject("存在未填写完整的明细行");
+              return;
+            }
+            
+            this.calculateTotalAmount();
+            
             console.log("处理附件数据");
             const attachments = this.attachmentList.map(item => {
               return {
@@ -348,7 +513,6 @@ export default {
                 fileType: item.fileType,
               };
             });
-            // 组装参数
             const params = {
               reimburse: this.form,
               detailList: this.detailList,

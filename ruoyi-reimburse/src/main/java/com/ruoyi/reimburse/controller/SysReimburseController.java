@@ -86,11 +86,11 @@ public class SysReimburseController extends BaseController
      * 修改报销申请单主
      */
     @PreAuthorize("@ss.hasPermi('system:reimburse:edit')")
-    @Log(title = "报销申请单主", businessType = BusinessType.UPDATE)
+    @Log(title = "修改申请单", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody SysReimburse sysReimburse)
+    public AjaxResult edit(@RequestBody ReimburseRequest reimburseRequest)
     {
-        return toAjax(sysReimburseService.updateSysReimburse(sysReimburse));
+        return toAjax(sysReimburseService.updateSysReimburse(reimburseRequest));
     }
 
     /**
@@ -110,4 +110,20 @@ public class SysReimburseController extends BaseController
     {
         return toAjax(sysReimburseService.createReimburse(reimburseRequest));
     }
+
+    @Log(title = "提交申请单", businessType = BusinessType.UPDATE)
+    @PostMapping("/submit/{reimburseId}")
+    public AjaxResult submit(@PathVariable Long reimburseId)
+    {
+        return toAjax(sysReimburseService.changeProcessState(reimburseId,"APPROVING"));
+    }
+
+    @Log(title = "提交申请单", businessType = BusinessType.UPDATE)
+    @PostMapping("/cancel/{reimburseId}")
+    public AjaxResult cancel(@PathVariable Long reimburseId)
+    {
+        return toAjax(sysReimburseService.changeProcessState(reimburseId,"DRAFT"));
+    }
+
+
 }

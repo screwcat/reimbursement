@@ -61,4 +61,6 @@ public interface SysReimburseAttachmentMapper
      * @return 结果
      */
     public int deleteSysReimburseAttachmentByAttachmentIds(Long[] attachmentIds);
+
+    public int deleteSysReimburseAttachmentByReimburseId(Long reimburseId);
 }

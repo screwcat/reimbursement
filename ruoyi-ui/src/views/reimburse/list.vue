@@ -53,7 +53,7 @@
           v-hasPermi="['system:reimburse:remove']"
         >删除</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="warning"
           plain
@@ -62,7 +62,7 @@
           @click="handleExport"
           v-hasPermi="['system:reimburse:export']"
         >导出</el-button>
-      </el-col>
+      </el-col> -->
     </el-row>
 
     <el-table
@@ -92,9 +92,9 @@
           <span>{{ scope.row.totalAmount.toFixed(2) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="提交时间" align="center" prop="submitTime" width="180">
+      <el-table-column label="创建时间" align="center" prop="createTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.submitTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+          <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="流程状态" align="center" prop="processStatus">

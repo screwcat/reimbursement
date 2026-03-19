@@ -59,4 +59,6 @@ public interface ISysReimburseAttachmentService
      * @return 结果
      */
     public int deleteSysReimburseAttachmentByAttachmentId(Long attachmentId);
+
+    public int deleteSysReimburseAttachmentByReimburseId(Long reimburseId);
 }
