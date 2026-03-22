@@ -1,5 +1,5 @@
 <template>
-  <div class="sidebar-logo-container" :class="{'collapse':collapse}" :style="{ backgroundColor: sideTheme === 'theme-dark' && navType !== 3 ? variables.menuBackground : variables.menuLightBackground }">
+  <div class="sidebar-logo-container" :class="{'collapse':collapse}" :style="{ backgroundColor: '#0008A7' }">
     <transition name="sidebarLogoFade">
       <router-link v-if="collapse" key="collapse" class="sidebar-logo-link" to="/">
         <img v-if="logo" :src="logo" class="sidebar-logo" />
@@ -59,7 +59,7 @@ export default {
   position: relative;
   height: 50px;
   line-height: 50px;
-  background: #2b2f3a;
+  background: #20adff;
   text-align: center;
   overflow: hidden;
 
@@ -91,5 +91,8 @@ export default {
       margin-right: 0px;
     }
   }
+}
+.top-logo{
+    background-image: url('../../../assets/images/xy1.png');
 }
 </style>

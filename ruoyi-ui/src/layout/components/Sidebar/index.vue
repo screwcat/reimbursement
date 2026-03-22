@@ -1,5 +1,5 @@
 <template>
-    <div :class="{'has-logo':showLogo}" :style="{ backgroundColor: settings.sideTheme === 'theme-dark' ? variables.menuBackground : variables.menuLightBackground }">
+    <div :class="{'has-logo':showLogo}" class="menuXY">
         <logo v-if="showLogo" :collapse="isCollapse" />
         <el-scrollbar :class="settings.sideTheme" wrap-class="scrollbar-wrapper">
             <el-menu
@@ -55,3 +55,8 @@ export default {
     }
 }
 </script>
+<style lang="scss" scoped>
+.menuXY {
+  background-image: url('../../../assets/images/xy1.png');
+}
+</style>
