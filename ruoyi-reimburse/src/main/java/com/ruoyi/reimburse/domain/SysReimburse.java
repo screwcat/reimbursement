@@ -25,6 +25,9 @@ public class SysReimburse extends BaseEntity
     @Excel(name = "单据编号")
     private String billNo;
 
+    @Excel(name = "提交人")
+    private String nickName;
+
     /** 开始时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "开始时间", width = 30, dateFormat = "yyyy-MM-dd")
@@ -36,7 +39,7 @@ public class SysReimburse extends BaseEntity
     private Date endTime;
 
     /** 月度选择(如2024-05) */
-    @Excel(name = "月度选择(如2024-05)")
+    @Excel(name = "月度")
     private String monthSelect;
 
     /** 票据总数 */
@@ -53,13 +56,11 @@ public class SysReimburse extends BaseEntity
     private Date submitTime;
 
     /** 流程状态：DRAFT-草稿，SUBMITTED-已提交，APPROVING-审批中，APPROVED-已审批，REJECTED-已驳回，CANCELED-已撤销 */
-    @Excel(name = "流程状态：DRAFT-草稿，SUBMITTED-已提交，APPROVING-审批中，APPROVED-已审批，REJECTED-已驳回，CANCELED-已撤销")
+    @Excel(name = "流程状态")
     private String processStatus;
 
     /** 删除标志（0代表存在 2代表删除） */
     private String delFlag;
-
-    private String nickName;
 
     public void setReimburseId(Long reimburseId)
     {

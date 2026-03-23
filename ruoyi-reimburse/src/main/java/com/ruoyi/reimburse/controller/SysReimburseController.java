@@ -53,7 +53,7 @@ public class SysReimburseController extends BaseController
      * 导出报销申请单主列表
      */
     @PreAuthorize("@ss.hasPermi('system:reimburse:export')")
-    @Log(title = "报销申请单主", businessType = BusinessType.EXPORT)
+    @Log(title = "报销申请单导出", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysReimburse sysReimburse)
     {

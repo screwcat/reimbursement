@@ -56,7 +56,7 @@
           v-hasPermi="['system:reimburse:remove']"
         >删除</el-button>
       </el-col>
-      <!-- <el-col :span="1.5">
+      <el-col :span="1.5">
         <el-button
           type="warning"
           plain
@@ -65,7 +65,7 @@
           @click="handleExport"
           v-hasPermi="['system:reimburse:export']"
         >导出</el-button>
-      </el-col> -->
+      </el-col>
     </el-row>
 
     <el-table
@@ -357,7 +357,7 @@ export default {
     },
     // 导出按钮操作
     handleExport() {
-      this.download('system/reimburse/export', {
+      this.download('reimburse/export', {
         ...this.queryParams
       }, `reimburse_${new Date().getTime()}.xlsx`)
     },
