@@ -21,12 +21,12 @@
       </el-form-item>
       <el-form-item label="流程状态" prop="processStatus">
         <el-select v-model="queryParams.processStatus" placeholder="请选择流程状态" clearable>
-          <el-option label="草稿" value="DRAFT" />
-          <!-- <el-option label="已提交" value="SUBMITTED" /> -->
-          <el-option label="审批中" value="APPROVING" />
-          <el-option label="已审批" value="APPROVED" />
-          <el-option label="已驳回" value="REJECTED" />
-          <!-- <el-option label="已撤销" value="CANCELED" /> -->
+          <el-option
+            v-for="dict in dict.type.process_status"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -103,12 +103,7 @@
       </el-table-column>
       <el-table-column label="流程状态" align="center" prop="processStatus">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.processStatus === 'DRAFT'" type="info">草稿</el-tag>
-          <el-tag v-else-if="scope.row.processStatus === 'SUBMITTED'" type="primary">已提交</el-tag>
-          <el-tag v-else-if="scope.row.processStatus === 'APPROVING'" type="warning">审批中</el-tag>
-          <el-tag v-else-if="scope.row.processStatus === 'APPROVED'" type="success">已审批</el-tag>
-          <el-tag v-else-if="scope.row.processStatus === 'REJECTED'" type="danger">已驳回</el-tag>
-          <el-tag v-else-if="scope.row.processStatus === 'CANCELED'" type="gray">已撤销</el-tag>
+          <dict-tag :options="dict.type.process_status" :value="scope.row.processStatus"/>
         </template>
       </el-table-column>
       <el-table-column label="提交时间" align="center" prop="submitTime" width="180">
@@ -215,6 +210,7 @@ import ReimburseForm from "./form";
 export default {
   name: "ReimburseList",
   components: { ReimburseForm },
+  dicts: ['process_status'],
   data() {
     return {
       // 遮罩层

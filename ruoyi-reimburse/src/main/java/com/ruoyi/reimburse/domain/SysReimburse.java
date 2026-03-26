@@ -3,6 +3,7 @@ package com.ruoyi.reimburse.domain;
 import java.math.BigDecimal;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ruoyi.common.utils.poi.ExcelDictHandler;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -56,7 +57,7 @@ public class SysReimburse extends BaseEntity
     private Date submitTime;
 
     /** 流程状态：DRAFT-草稿，SUBMITTED-已提交，APPROVING-审批中，APPROVED-已审批，REJECTED-已驳回，CANCELED-已撤销 */
-    @Excel(name = "流程状态")
+    @Excel(name = "流程状态", handler = ExcelDictHandler.class, args = {"process_status"})
     private String processStatus;
 
     /** 删除标志（0代表存在 2代表删除） */
