@@ -192,15 +192,31 @@
       >
         <i class="el-icon-plus"></i>
         <div slot="tip" class="el-upload__tip">
-          请上传jpg/png格式的图片，单张图片不超过5MB，最多上传10张
+          请上传jpg/png/pdf格式的文件，单个文件不超过5MB，最多上传10个
         </div>
         <template slot="file" slot-scope="{file}">
           <div class="el-upload-list__item">
-            <img class="el-upload-list__item-thumbnail" :src="file.url" alt="" />
+            <!-- 图片显示缩略图，PDF显示生成的缩略图 -->
+            <div v-if="file.type.includes('image')" class="file-preview-img">
+              <img class="el-upload-list__item-thumbnail" :src="'../profile/upload/'+file.url" alt="" />
+            </div>
+            <div v-else-if="file.type.includes('pdf')" class="file-preview-pdf">
+              <!-- PDF显示生成的缩略图 -->
+              <img 
+                v-if="file.thumbnailUrl" 
+                class="el-upload-list__item-thumbnail" 
+                :src="'../profile/upload/'+file.thumbnailUrl" 
+                alt="PDF缩略图"
+              />
+              <div v-else class="pdf-placeholder">
+                <i class="el-icon-file-pdf"></i>
+                <span class="pdf-name">{{ file.name || file.fileName }}</span>
+              </div>
+            </div>
             <span class="el-upload-list__item-actions">
               <span
                 class="el-upload-list__item-preview"
-                @click="handlePictureCardPreview(file)"
+                @click="handleFilePreview(file)"
               >
                 <i class="el-icon-zoom-in"></i>
               </span>
@@ -222,8 +238,16 @@
           </div>
         </template>
       </el-upload>
-      <el-dialog :visible.sync="previewOpen" title="图片预览" width="80%">
-        <img :src="previewUrl" style="width: 100%;" />
+      <!-- 图片预览弹窗 -->
+      <el-dialog :visible.sync="previewOpen" title="文件预览" width="80%" append-to-body>
+        <img v-if="previewType === 'image'" :src="previewUrl" style="width: 100%;" />
+        <div v-else-if="previewType === 'pdf'" class="pdf-preview-container">
+          <embed :src="previewUrl" type="application/pdf" width="100%" height="600px" />
+        </div>
+        <div v-else class="preview-error">
+          <i class="el-icon-warning"></i>
+          暂不支持该类型文件预览
+        </div>
       </el-dialog>
     </el-card>
   </el-form>
@@ -262,12 +286,12 @@ export default {
       selectedDetailRows: [],
       previewOpen: false,
       previewUrl: "",
+      previewType: "", // image/pdf/other
       uploadUrl: process.env.VUE_APP_BASE_API + "/common/upload",
       uploadHeaders: {
         Authorization: "Bearer " + getToken(),
       },
       rules: {
-        // 校验时间范围
         dateRange: [{ 
           required: true, 
           message: "时间范围不能为空", 
@@ -341,6 +365,9 @@ export default {
             ...item,
             url: item.filePath,
             name: item.fileName,
+            type: item.fileType, // 确保文件类型字段存在
+            uid: item.uid || index, // 确保有唯一标识
+            thumbnailUrl: item.thumbnailUrl,
           }));
         });
       }
@@ -451,71 +478,112 @@ export default {
     },
 
     beforeUpload(file) {
-      const isJPG = file.type === "image/jpeg" || file.type === "image/png";
+      // 支持的文件类型
+      const allowedTypes = [
+        "image/jpeg", 
+        "image/png", 
+        "application/pdf",
+        "application/x-pdf",
+        "application/octet-stream" // 兼容部分PDF的MIME类型
+      ];
+      // 文件大小限制5MB
       const isLt5M = file.size / 1024 / 1024 < 5;
-      if (!isJPG) {
-        this.$modal.msgError("请上传jpg/png格式的图片");
+
+      // 校验文件类型
+      const fileType = file.type;
+      const fileName = file.name.toLowerCase();
+      const isAllowedType = allowedTypes.includes(fileType) || fileName.endsWith('.pdf');
+      
+      if (!isAllowedType) {
+        this.$modal.msgError("请上传jpg/png/pdf格式的文件");
         return false;
       }
       if (!isLt5M) {
-        this.$modal.msgError("图片大小不能超过5MB");
+        this.$modal.msgError("文件大小不能超过5MB");
         return false;
       }
       return true;
     },
 
     handleUploadSuccess(response, file) {
-      this.attachmentList.push({
+      // 构建附件对象，包含缩略图地址
+      const attachment = {
         fileName: response.originalFilename,
         filePath: response.fileName,
         fileSize: file.size,
-        fileType: file.raw.type,
+        fileType: response.fileType || file.raw.type,
         url: response.url,
-      });
+        thumbnailUrl: response.thumbnailUrl, // 新增：保存缩略图地址
+        name: response.originalFilename,
+        uid: file.uid,
+        type: response.fileType || file.raw.type
+      };
+      this.attachmentList.push(attachment);
     },
 
     handleExceed(files, fileList) {
-      this.$modal.msgError(`最多只能上传10张图片`);
+      this.$modal.msgError(`最多只能上传10个文件`);
     },
 
-    handlePictureCardPreview(file) {
-      this.previewUrl = file.url;
-      this.previewOpen = true;
+    // 处理文件预览（图片+PDF）
+    handleFilePreview(file) {
+      if (!file.url) {
+        this.$modal.msgError("文件预览地址无效");
+        return;
+      }
+      let fileUrl = "../profile/upload/" + file.url;
+      // 判断文件类型
+      if (file.type.includes('image') || file.name?.toLowerCase().endsWith(('.jpg', '.png'))) {
+        this.previewType = 'image';
+        // 图片预加载
+        const img = new Image();
+        img.src = fileUrl;
+        img.onload = () => {
+          this.previewUrl = fileUrl;
+          this.previewOpen = true;
+        };
+        img.onerror = () => {
+          this.$modal.msgError("图片加载失败，请检查文件地址");
+        };
+      } else if (file.type.includes('pdf') || file.name?.toLowerCase().endsWith('.pdf')) {
+        this.previewType = 'pdf';
+        this.previewUrl = fileUrl;
+        this.previewOpen = true;
+      } else {
+        this.previewType = 'other';
+        this.$modal.msgWarning("暂不支持该类型文件预览");
+        this.previewOpen = true;
+      }
     },
-    // handlePictureCardPreview(file) {
-    //   // 1. 校验 URL 有效性
-    //   if (!file.url) {
-    //     this.$modal.msgError("图片预览地址无效");
-    //     return;
-    //   }
-    //   // 2. 先预加载图片，避免弹窗空白
-    //   const img = new Image();
-    //   img.onload = () => {
-    //     this.previewUrl = file.url;
-    //     this.previewOpen = true; // 图片加载完成后再打开弹窗
-    //   };
-    //   img.onerror = () => {
-    //     this.$modal.msgError("图片加载失败，请检查图片地址");
-    //   };
-    //   img.src = file.url; // 触发图片预加载
-    // },
+
     handleRemove(file) {
       const index = this.attachmentList.findIndex(item => item.uid === file.uid);
       if (index > -1) {
         this.attachmentList.splice(index, 1);
       }
     },
+
     handleDownload(file) {
       const link = document.createElement("a");
       link.href = file.url;
       link.download = file.name || file.fileName;
+      // PDF下载需要添加target=_blank兼容部分浏览器
+      link.target = '_blank';
+      // 解决跨域下载问题
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     },
 
     submitForm() {
       return new Promise((resolve, reject) => {
         this.$refs.form.validate((valid) => {
           if (valid) {
+            if (this.detailList.length === 0) {
+              this.$modal.msgWarning("明细列表不能为空，请至少添加一条明细！");
+              return false;
+            }
             const allValid = this.detailList.every(row => {
               const requiredFields = ['ticketType', 'ticketNum', 'startPlace', 'endPlace', 'ticketDate', 'amount'];
               for (const field of requiredFields) {
@@ -543,6 +611,7 @@ export default {
                 filePath: item.filePath,
                 fileSize: item.fileSize,
                 fileType: item.fileType,
+                thumbnailUrl: item.thumbnailUrl,
               };
             });
             if (this.form.dateRange && this.form.dateRange.length === 2) {
@@ -617,3 +686,62 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* PDF预览样式 */
+.pdf-preview-container {
+  width: 100%;
+  height: 600px;
+}
+
+/* 文件预览错误样式 */
+.preview-error {
+  text-align: center;
+  padding: 50px 0;
+  color: #f56c6c;
+  font-size: 16px;
+}
+
+.preview-error i {
+  font-size: 24px;
+  margin-right: 8px;
+}
+
+/* PDF文件预览卡片样式 */
+.file-preview-pdf {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f7fa;
+  color: #409eff;
+}
+
+.file-preview-pdf i {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.pdf-name {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 80%;
+  text-align: center;
+}
+
+/* 图片预览样式 */
+.file-preview-img {
+  width: 100%;
+  height: 100%;
+}
+
+.el-upload-list__item-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+</style>

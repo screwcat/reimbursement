@@ -18,7 +18,7 @@ import com.ruoyi.common.utils.uuid.Seq;
 
 /**
  * 文件上传工具类
- * 
+ *
  * @author ruoyi
  */
 public class FileUploadUtils
@@ -103,9 +103,9 @@ public class FileUploadUtils
             throws FileSizeLimitExceededException, IOException, FileNameLengthLimitExceededException,
             InvalidExtensionException
     {
-        return upload(baseDir, file, allowedExtension, false);
+        return upload(baseDir, file, allowedExtension, true);
     }
-    
+
     /**
      * 文件上传
      *
@@ -119,13 +119,31 @@ public class FileUploadUtils
      * @throws IOException 比如读写文件出错时
      * @throws InvalidExtensionException 文件校验异常
      */
+//    public static final String upload(String baseDir, MultipartFile file, String[] allowedExtension, boolean useCustomNaming)
+//            throws FileSizeLimitExceededException, IOException, FileNameLengthLimitExceededException,
+//            InvalidExtensionException
+//    {
+//        int fileNameLength = Objects.requireNonNull(file.getOriginalFilename()).length();
+//        if (fileNameLength > FileUploadUtils.DEFAULT_FILE_NAME_LENGTH)
+//        {
+//            throw new FileNameLengthLimitExceededException(FileUploadUtils.DEFAULT_FILE_NAME_LENGTH);
+//        }
+//
+//        assertAllowed(file, allowedExtension);
+//
+//        String fileName = useCustomNaming ? uuidFilename(file) : extractFilename(file);
+//
+//        String absPath = getAbsoluteFile(baseDir, fileName).getAbsolutePath();
+//        file.transferTo(Paths.get(absPath));
+//        return getPathFileName(baseDir, fileName);
+//    }
+
+    // 找到upload方法（带useCustomNaming参数的重载方法）
     public static final String upload(String baseDir, MultipartFile file, String[] allowedExtension, boolean useCustomNaming)
             throws FileSizeLimitExceededException, IOException, FileNameLengthLimitExceededException,
-            InvalidExtensionException
-    {
+            InvalidExtensionException {
         int fileNameLength = Objects.requireNonNull(file.getOriginalFilename()).length();
-        if (fileNameLength > FileUploadUtils.DEFAULT_FILE_NAME_LENGTH)
-        {
+        if (fileNameLength > FileUploadUtils.DEFAULT_FILE_NAME_LENGTH) {
             throw new FileNameLengthLimitExceededException(FileUploadUtils.DEFAULT_FILE_NAME_LENGTH);
         }
 
@@ -135,7 +153,23 @@ public class FileUploadUtils
 
         String absPath = getAbsoluteFile(baseDir, fileName).getAbsolutePath();
         file.transferTo(Paths.get(absPath));
-        return getPathFileName(baseDir, fileName);
+
+        // 新增：如果是PDF文件，生成缩略图
+        String thumbnailPath = null;
+        String extension = getExtension(file).toLowerCase();
+        if ("pdf".equals(extension)) {
+            thumbnailPath = PdfThumbnailUtils.generatePdfThumbnail(file, baseDir, fileName);
+        }
+
+        // 返回结果调整：原文件名 + 缩略图路径（如果有）
+        // 注意：这里需要修改返回逻辑，返回包含原文件和缩略图的对象，所以先新增一个内部类封装结果
+        // 临时方案：先返回原文件名，缩略图路径通过方法额外返回，或者修改返回值为Map
+        // 简化处理：先在upload方法中生成缩略图，然后将缩略图路径作为附加信息返回
+        // 这里调整返回格式为：原文件名|缩略图路径（如果有）
+        if (thumbnailPath != null) {
+            return fileName + "|" + thumbnailPath;
+        }
+        return fileName;
     }
 
     /**
@@ -244,7 +278,7 @@ public class FileUploadUtils
 
     /**
      * 获取文件名的后缀
-     * 
+     *
      * @param file 表单文件
      * @return 后缀名
      */

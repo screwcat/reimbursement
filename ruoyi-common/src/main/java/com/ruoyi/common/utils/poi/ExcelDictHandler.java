@@ -20,20 +20,17 @@ public class ExcelDictHandler implements ExcelHandlerAdapter {
      */
     @Override
     public Object format(Object value, String[] args, Cell cell, Workbook wb) {
-        // 1. 判断是否传递了字典类型
+
         if (args == null || args.length == 0) {
             return value;
         }
 
-        // 2. 获取字典类型（如 process_status）
         String dictType = args[0];
 
-        // 3. 空值处理
         if (value == null) {
             return "未知";
         }
 
-        // 4. 核心：字典值 → 中文
         return DictUtils.getDictLabel(dictType, value.toString(), "未知");
     }
 }

@@ -22,7 +22,7 @@ import com.ruoyi.framework.config.ServerConfig;
 
 /**
  * 通用请求处理
- * 
+ *
  * @author ruoyi
  */
 @RestController
@@ -38,7 +38,7 @@ public class CommonController
 
     /**
      * 通用下载请求
-     * 
+     *
      * @param fileName 文件名称
      * @param delete 是否删除
      */
@@ -71,25 +71,58 @@ public class CommonController
     /**
      * 通用上传请求（单个）
      */
+//    @PostMapping("/upload")
+//    public AjaxResult uploadFile(MultipartFile file) throws Exception
+//    {
+//        try
+//        {
+//            // 上传文件路径
+//            String filePath = RuoYiConfig.getUploadPath();
+//            // 上传并返回新文件名称
+//            String fileName = FileUploadUtils.upload(filePath, file);
+//            String url = serverConfig.getUrl() + fileName;
+//            AjaxResult ajax = AjaxResult.success();
+//            ajax.put("url", url);
+//            ajax.put("fileName", fileName);
+//            ajax.put("newFileName", FileUtils.getName(fileName));
+//            ajax.put("originalFilename", file.getOriginalFilename());
+//            return ajax;
+//        }
+//        catch (Exception e)
+//        {
+//            return AjaxResult.error(e.getMessage());
+//        }
+//    }
+
     @PostMapping("/upload")
-    public AjaxResult uploadFile(MultipartFile file) throws Exception
-    {
-        try
-        {
+    public AjaxResult uploadFile(MultipartFile file) throws Exception {
+        try {
             // 上传文件路径
             String filePath = RuoYiConfig.getUploadPath();
-            // 上传并返回新文件名称
-            String fileName = FileUploadUtils.upload(filePath, file);
-            String url = serverConfig.getUrl() + fileName;
+            // 上传并返回新文件名称（可能包含缩略图路径）
+            String uploadResult = FileUploadUtils.upload(filePath, file);
+
+            String fileName = uploadResult;
+            String thumbnailUrl = null;
+
+            // 解析是否包含缩略图路径
+            if (uploadResult.contains("|")) {
+                String[] parts = uploadResult.split("\\|");
+                fileName = parts[0];
+                String thumbnailPath = parts[1];
+                thumbnailUrl = thumbnailPath;
+            }
+
+            String url = fileName;
             AjaxResult ajax = AjaxResult.success();
             ajax.put("url", url);
             ajax.put("fileName", fileName);
             ajax.put("newFileName", FileUtils.getName(fileName));
             ajax.put("originalFilename", file.getOriginalFilename());
+            ajax.put("thumbnailUrl", thumbnailUrl); // 新增：返回缩略图地址
+            ajax.put("fileType", file.getContentType()); // 新增：返回文件类型
             return ajax;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return AjaxResult.error(e.getMessage());
         }
     }

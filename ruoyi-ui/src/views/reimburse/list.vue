@@ -170,6 +170,7 @@
       :visible.sync="open"
       width="80%"
       append-to-body
+      :close-on-click-modal="false"
     >
       <reimburse-form
         ref="reimburseForm"
@@ -188,6 +189,7 @@
       :visible.sync="viewOpen"
       width="80%"
       append-to-body
+      :close-on-click-modal="false"
     >
       <reimburse-form
         ref="reimburseViewForm"

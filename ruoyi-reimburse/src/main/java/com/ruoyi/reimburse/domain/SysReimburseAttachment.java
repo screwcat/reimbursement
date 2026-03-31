@@ -31,6 +31,10 @@ public class SysReimburseAttachment extends BaseEntity
     @Excel(name = "文件路径")
     private String filePath;
 
+    /** 缩略图路径 */
+    @Excel(name = "缩略图路径")
+    private String thumbnailUrl;
+
     /** 文件大小(字节) */
     @Excel(name = "文件大小(字节)")
     private Long fileSize;
@@ -77,6 +81,16 @@ public class SysReimburseAttachment extends BaseEntity
     public String getFilePath()
     {
         return filePath;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl)
+    {
+        this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public String getThumbnailUrl()
+    {
+        return thumbnailUrl;
     }
 
     public void setFileSize(Long fileSize)

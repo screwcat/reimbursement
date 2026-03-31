@@ -9,6 +9,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="reimburseId"    column="reimburse_id"    />
         <result property="fileName"    column="file_name"    />
         <result property="filePath"    column="file_path"    />
+        <result property="thumbnailUrl"    column="thumbnail_url"    />
         <result property="fileSize"    column="file_size"    />
         <result property="fileType"    column="file_type"    />
         <result property="createBy"    column="create_by"    />
@@ -16,7 +17,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectSysReimburseAttachmentVo">
-        select attachment_id, reimburse_id, file_name, file_path, file_size, file_type, create_by, create_time from sys_reimburse_attachment
+        select attachment_id, reimburse_id, file_name, file_path, thumbnail_url, file_size, file_type, create_by, create_time from sys_reimburse_attachment
     </sql>
 
     <select id="selectSysReimburseAttachmentList" parameterType="SysReimburseAttachment" resultMap="SysReimburseAttachmentResult">
@@ -41,6 +42,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="reimburseId != null">reimburse_id,</if>
             <if test="fileName != null and fileName != ''">file_name,</if>
             <if test="filePath != null and filePath != ''">file_path,</if>
+            <if test="thumbnailUrl != null and thumbnailUrl != ''">thumbnail_url,</if>
             <if test="fileSize != null">file_size,</if>
             <if test="fileType != null and fileType != ''">file_type,</if>
             <if test="createBy != null">create_by,</if>
@@ -50,6 +52,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="reimburseId != null">#{reimburseId},</if>
             <if test="fileName != null and fileName != ''">#{fileName},</if>
             <if test="filePath != null and filePath != ''">#{filePath},</if>
+            <if test="thumbnailUrl != null and thumbnailUrl != ''">#{thumbnailUrl},</if>
             <if test="fileSize != null">#{fileSize},</if>
             <if test="fileType != null and fileType != ''">#{fileType},</if>
             <if test="createBy != null">#{createBy},</if>
@@ -63,6 +66,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="reimburseId != null">reimburse_id = #{reimburseId},</if>
             <if test="fileName != null and fileName != ''">file_name = #{fileName},</if>
             <if test="filePath != null and filePath != ''">file_path = #{filePath},</if>
+            <if test="thumbnailUrl != null and thumbnailUrl != ''">thumbnail_url = #{thumbnailUrl},</if>
             <if test="fileSize != null">file_size = #{fileSize},</if>
             <if test="fileType != null and fileType != ''">file_type = #{fileType},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
