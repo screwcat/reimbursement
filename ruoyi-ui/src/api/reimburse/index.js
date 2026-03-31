@@ -83,3 +83,11 @@ export function changeProcessState(data) {
     data: data
   })
 }
+
+export function getTravelStatistics(query) {
+  return request({
+    url: '/reimburse/travelStatistics',
+    method: 'get',
+    params: query
+  });
+}
