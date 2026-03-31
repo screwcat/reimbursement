@@ -1,19 +1,40 @@
 <template>
-  <div class="chart-wrapper">
-    <h2>员工出差日程甘特图</h2>
-    <div ref="chart" style="width: 100%; height: 500px;"></div>
+  <div class="gantt-container">
+    <!-- 头部：姓名列 + 日期轴 -->
+    <div class="gantt-header">
+      <div class="name-col header-name">姓名</div>
+      <div class="date-axis">
+        <div v-for="day in 30" :key="day" class="date-item">{{ day }}日</div>
+      </div>
+    </div>
+    <!-- 主体：员工行 -->
+    <div class="gantt-body">
+      <div v-for="(employee, empIndex) in retData" :key="empIndex" class="employee-row">
+        <!-- 员工姓名列 -->
+        <div class="name-col">{{ employee.employeeName }}</div>
+        <!-- 出差条容器（和日期轴同宽） -->
+        <div class="travel-container">
+          <div
+            v-for="(period, pIndex) in employee.travelPeriods"
+            :key="pIndex"
+            class="travel-bar"
+            :style="{
+              left: `${(period.startDay - 1) * (100 / 30)}%`,
+              width: `${(period.endDay - period.startDay + 1) * (100 / 30)}%`,
+              backgroundColor: employee.color
+            }"
+          ></div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import * as echarts from 'echarts';
-
 export default {
-  name: 'TravelGantt',
+  name: "TravelGanttChart",
   data() {
     return {
-      chartInstance: null,
-      // 原始数据
       retData: [
         {
           employeeName: "张三",
@@ -39,118 +60,93 @@ export default {
             { startDay: 22, endDay: 25 }
           ]
         }
-      ],
-      // 定义每个员工对应的颜色
-      colorMap: {
-        "张三": "#6faed9", // 浅蓝色
-        "李四": "#f7c442", // 黄色
-        "王五": "#8bc34a"  // 绿色
-      }
+      ]
     };
   },
-  mounted() {
-    this.initChart();
+  created() {
+    // 为每个员工生成随机浅色系颜色
+    this.retData.forEach(emp => {
+      emp.color = this.getRandomLightColor();
+    });
   },
   methods: {
-    initChart() {
-      this.chartInstance = echarts.init(this.$refs.chart);
-
-      // 1. 数据处理：将层级数据扁平化为图表可用的格式
-      // 格式：[startDay, endDay, employeeName]
-      const chartData = [];
-      this.retData.forEach(item => {
-        item.travelPeriods.forEach(period => {
-          chartData.push({
-            name: item.employeeName,
-            value: [period.startDay, period.endDay, item.employeeName]
-          });
-        });
-      });
-
-      // 提取员工姓名作为 Y 轴类目
-      const employeeNames = this.retData.map(item => item.employeeName);
-
-      const option = {
-        tooltip: {
-          formatter: function (params) {
-            const data = params.value;
-            return `${data[2]} : ${data[0]}日 - ${data[1]}日`;
-          }
-        },
-        grid: {
-          left: '10%',
-          right: '5%',
-          top: '10%',
-          bottom: '10%'
-        },
-        xAxis: {
-          type: 'value',
-          name: '日期',
-          min: 1,
-          max: 30,
-          axisLabel: {
-            formatter: '{value}日'
-          },
-          splitLine: { show: false }
-        },
-        yAxis: {
-          type: 'category',
-          data: employeeNames,
-          axisLine: { show: false },
-          axisTick: { show: false }
-        },
-        series: [
-          {
-            name: '出差行程',
-            type: 'custom',
-            renderItem: (params, api) => {
-              // 获取当前数据项的 Y 轴坐标（对应员工姓名）
-              const yValue = api.value(2);
-              // 获取 StartDay 的 X 轴坐标
-              const startCoord = api.coord([api.value(0), yValue]);
-              // 获取 EndDay 的 X 轴坐标
-              const endCoord = api.coord([api.value(1), yValue]);
-
-              // 计算柱状图的高度
-              // api.size([width, height]) 返回像素尺寸，这里我们利用它计算单行的高度
-              const height = api.size([0, 1])[1] * 0.6; // 0.6 是柱子高度占行高的比例
-
-              return {
-                type: 'rect',
-                shape: {
-                  x: startCoord[0],
-                  y: startCoord[1] - height / 2,
-                  width: endCoord[0] - startCoord[0],
-                  height: height
-                },
-                style: api.style({
-                  // 根据员工姓名从 colorMap 中获取颜色
-                  fill: this.colorMap[yValue] || '#ccc',
-                  stroke: '#555' // 边框颜色
-                })
-              };
-            },
-            encode: {
-              x: [0, 1], // 使用 value 的第0项和第1项作为 x 范围
-              y: 2,      // 使用 value 的第2项（姓名）作为 y 轴
-              tooltip: [0, 1, 2]
-            },
-            data: chartData
-          }
-        ]
-      };
-
-      this.chartInstance.setOption(option);
+    // 生成随机浅色系RGB颜色
+    getRandomLightColor() {
+      const r = Math.floor(150 + Math.random() * 105);
+      const g = Math.floor(150 + Math.random() * 105);
+      const b = Math.floor(150 + Math.random() * 105);
+      return `rgb(${r}, ${g}, ${b})`;
     }
   }
 };
 </script>
 
 <style scoped>
-.chart-wrapper {
-  padding: 20px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+/* 整体容器 - 边框包裹 */
+.gantt-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto;
+  border: 1px solid #000;
+  box-sizing: border-box;
+}
+
+/* 头部：姓名列 + 日期轴 横向排列 */
+.gantt-header {
+  display: flex;
+  border-bottom: 1px solid #000;
+}
+/* 姓名列（固定宽度） */
+.name-col {
+  width: 80px;
+  text-align: center;
+  line-height: 30px;
+  font-size: 14px;
+  border-right: 1px solid #000;
+  box-sizing: border-box;
+}
+.header-name {
+  font-weight: bold;
+}
+
+/* 日期轴 - 和出差容器同宽 */
+.date-axis {
+  display: flex;
+  flex: 1;
+}
+.date-item {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  line-height: 30px;
+  box-sizing: border-box;
+}
+
+/* 主体：员工行容器 */
+.gantt-body {
+  display: flex;
+  flex-direction: column;
+}
+.employee-row {
+  display: flex;
+  height: 40px;
+  border-bottom: 1px solid #eee;
+}
+
+/* 出差条容器（和日期轴完全对齐） */
+.travel-container {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  box-sizing: border-box;
+}
+/* 出差条样式 */
+.travel-bar {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%); /* 垂直居中 */
+  height: 80%; /* 留边距更美观 */
+  border-radius: 2px;
+  box-sizing: border-box;
 }
 </style>
