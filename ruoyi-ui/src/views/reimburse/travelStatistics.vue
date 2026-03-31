@@ -36,7 +36,7 @@ export default {
           travelPeriods: [
             { startDay: 2, endDay: 7 },
             { startDay: 11, endDay: 19 },
-            { startDay: 22, endDay: 29 }
+            { startDay: 22, endDay: 25 }
           ]
         }
       ],
