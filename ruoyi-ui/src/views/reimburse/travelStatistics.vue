@@ -1,40 +1,16 @@
 <template>
-  <div class="gantt-container">
-    <!-- 头部：姓名列 + 日期轴 -->
-    <div class="gantt-header">
-      <div class="name-col header-name">姓名</div>
-      <div class="date-axis">
-        <div v-for="day in 30" :key="day" class="date-item">{{ day }}日</div>
-      </div>
-    </div>
-    <!-- 主体：员工行 -->
-    <div class="gantt-body">
-      <div v-for="(employee, empIndex) in retData" :key="empIndex" class="employee-row">
-        <!-- 员工姓名列 -->
-        <div class="name-col">{{ employee.employeeName }}</div>
-        <!-- 出差条容器（和日期轴同宽） -->
-        <div class="travel-container">
-          <div
-            v-for="(period, pIndex) in employee.travelPeriods"
-            :key="pIndex"
-            class="travel-bar"
-            :style="{
-              left: `${(period.startDay - 1) * (100 / 30)}%`,
-              width: `${(period.endDay - period.startDay + 1) * (100 / 30)}%`,
-              backgroundColor: employee.color
-            }"
-          ></div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div id="gantt-chart" style="width: 100%; height: 400px;"></div>
 </template>
 
 <script>
+// ECharts 5.x 正确引入方式（统一入口）
+import * as echarts from 'echarts';
+
 export default {
-  name: "TravelGanttChart",
+  name: "TravelGanttWithEcharts",
   data() {
     return {
+      chart: null,
       retData: [
         {
           employeeName: "张三",
@@ -63,90 +39,130 @@ export default {
       ]
     };
   },
-  created() {
-    // 为每个员工生成随机浅色系颜色
-    this.retData.forEach(emp => {
-      emp.color = this.getRandomLightColor();
+  mounted() {
+    // 确保DOM完全渲染后初始化
+    this.$nextTick(() => {
+      this.initChart();
     });
   },
+  beforeDestroy() {
+    // 销毁图表，避免内存泄漏
+    if (this.chart) {
+      this.chart.dispose();
+      this.chart = null;
+    }
+  },
   methods: {
-    // 生成随机浅色系RGB颜色
+    // 生成随机浅色系颜色
     getRandomLightColor() {
       const r = Math.floor(150 + Math.random() * 105);
       const g = Math.floor(150 + Math.random() * 105);
       const b = Math.floor(150 + Math.random() * 105);
       return `rgb(${r}, ${g}, ${b})`;
+    },
+
+    // 转换数据为ECharts格式
+    transformData() {
+      const echartsData = [];
+      const employeeColors = {};
+
+      // 为每个员工分配唯一颜色
+      this.retData.forEach(emp => {
+        employeeColors[emp.employeeName] = this.getRandomLightColor();
+      });
+
+      // 遍历出差时段生成ECharts数据
+      this.retData.forEach(emp => {
+        emp.travelPeriods.forEach(period => {
+          echartsData.push({
+            name: emp.employeeName,
+            value: [period.startDay, period.endDay, emp.employeeName],
+            itemStyle: {
+              color: employeeColors[emp.employeeName]
+            }
+          });
+        });
+      });
+
+      return {
+        echartsData,
+        employeeNames: this.retData.map(emp => emp.employeeName)
+      };
+    },
+
+    // 初始化ECharts图表（适配5.4.0）
+    initChart() {
+      // 1. 校验DOM元素是否存在
+      const chartDom = document.getElementById('gantt-chart');
+      if (!chartDom) {
+        console.error('图表容器DOM不存在');
+        return;
+      }
+
+      // 2. 初始化图表（5.x 写法和4.x一致，只是引入方式不同）
+      this.chart = echarts.init(chartDom);
+      const { echartsData, employeeNames } = this.transformData();
+
+      // 3. 图表配置项（5.x 完全兼容4.x的配置）
+      const option = {
+        grid: {
+          left: '80px',   // 避免姓名覆盖日期轴
+          right: '20px',
+          top: '30px',
+          bottom: '20px'
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: params => {
+            const [startDay, endDay, name] = params.value;
+            return `${name}<br/>出差时段：${startDay}日 - ${endDay}日`;
+          }
+        },
+        xAxis: {
+          type: 'value',
+          min: 1,
+          max: 30,
+          axisLabel: { formatter: '{value}日' },
+          axisLine: { show: true },
+          splitLine: {
+            show: true,
+            lineStyle: { type: 'dashed' }
+          }
+        },
+        yAxis: {
+          type: 'category',
+          data: employeeNames,
+          axisLine: { show: true }
+        },
+        series: [
+          {
+            name: '出差时段',
+            type: 'bar',
+            data: echartsData,
+            barWidth: '60%',    // 柱子高度
+            barCategoryGap: '20%',
+            itemStyle: { borderRadius: 2 }
+          }
+        ]
+      };
+
+      // 4. 渲染图表
+      this.chart.setOption(option);
+
+      // 5. 自适应窗口大小
+      window.addEventListener('resize', () => {
+        this.chart && this.chart.resize();
+      });
     }
   }
 };
 </script>
 
 <style scoped>
-/* 整体容器 - 边框包裹 */
-.gantt-container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 20px auto;
+#gantt-chart {
   border: 1px solid #000;
   box-sizing: border-box;
-}
-
-/* 头部：姓名列 + 日期轴 横向排列 */
-.gantt-header {
-  display: flex;
-  border-bottom: 1px solid #000;
-}
-/* 姓名列（固定宽度） */
-.name-col {
-  width: 80px;
-  text-align: center;
-  line-height: 30px;
-  font-size: 14px;
-  border-right: 1px solid #000;
-  box-sizing: border-box;
-}
-.header-name {
-  font-weight: bold;
-}
-
-/* 日期轴 - 和出差容器同宽 */
-.date-axis {
-  display: flex;
-  flex: 1;
-}
-.date-item {
-  flex: 1;
-  text-align: center;
-  font-size: 12px;
-  line-height: 30px;
-  box-sizing: border-box;
-}
-
-/* 主体：员工行容器 */
-.gantt-body {
-  display: flex;
-  flex-direction: column;
-}
-.employee-row {
-  display: flex;
-  height: 40px;
-  border-bottom: 1px solid #eee;
-}
-
-/* 出差条容器（和日期轴完全对齐） */
-.travel-container {
-  position: relative;
-  flex: 1;
-  height: 100%;
-  box-sizing: border-box;
-}
-/* 出差条样式 */
-.travel-bar {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%); /* 垂直居中 */
-  height: 80%; /* 留边距更美观 */
-  border-radius: 2px;
-  box-sizing: border-box;
+  margin: 20px auto;
+  max-width: 1200px;
 }
 </style>
