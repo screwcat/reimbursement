@@ -38,12 +38,6 @@ export default {
       },
       // 存储查询范围的日期刻度（如["3/1", "3/2"... "4/30"]）
       dateScale: [],
-      // 马卡龙色系基础色值（可根据需要扩展）
-      macaronBaseColors: [
-        '#FFC2E2', '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', 
-        '#BAE1FF', '#D9AEFC', '#FFC8DD', '#FFAFCC', '#BDE0FE', 
-        '#A2D2FF', '#F4ACB7', '#9D8189', '#8E9AAF', '#C8B6FF'
-      ],
     };
   },
   mounted() {
@@ -313,42 +307,17 @@ export default {
       const colorMap = {};
       // 如果需要的颜色数量超过基础色库，循环使用并微调亮度
       for (let i = 0; i < length; i++) {
-        // let baseColor = this.macaronBaseColors[i % this.macaronBaseColors.length];
-        // // 对超出基础色库的颜色进行轻微亮度调整，避免完全重复
-        // if (i >= this.macaronBaseColors.length) {
-        //   const hueStep = Math.floor(Math.random() * 10) - 5; // 亮度微调值
-        //   baseColor = this.adjustColorBrightness(baseColor, hueStep);
-        // }
         colorMap[i] = this.getRandomLightColor();
       }
       // 保留默认色（可选）
       colorMap['默认'] = '#589eff';
       return colorMap;
     },
-    // 调整颜色亮度（辅助方法）
-    adjustColorBrightness(color, step) {
-      // 解析十六进制颜色为RGB
-      const rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
-      if (!rgb) return color;
-      
-      let r = parseInt(rgb[1], 16);
-      let g = parseInt(rgb[2], 16);
-      let b = parseInt(rgb[3], 16);
-      
-      // 调整亮度，确保在0-255范围内
-      r = Math.max(0, Math.min(255, r + step));
-      g = Math.max(0, Math.min(255, g + step));
-      b = Math.max(0, Math.min(255, b + step));
-      
-      // 转回十六进制
-      const toHex = (val) => val.toString(16).padStart(2, '0');
-      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-    },
     // 生成随机浅色系RGB颜色，返回十六进制格式
     getRandomLightColor() {
-      const r = Math.floor(150 + Math.random() * 105);
-      const g = Math.floor(150 + Math.random() * 105);
-      const b = Math.floor(150 + Math.random() * 105);
+      const r = Math.floor(139 + Math.random() * 105);
+      const g = Math.floor(139 + Math.random() * 105);
+      const b = Math.floor(139 + Math.random() * 105);
 
       // 转为两位十六进制，并拼接成 #RRGGBB 格式
       const toHex = (c) => c.toString(16).padStart(2, '0');
