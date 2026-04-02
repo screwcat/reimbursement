@@ -1,11 +1,11 @@
 package com.ruoyi.reimburse.service.impl;
 
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.reimburse.domain.ReimburseRequest;
-import com.ruoyi.reimburse.domain.SysReimburse;
-import com.ruoyi.reimburse.domain.SysReimburseAttachment;
-import com.ruoyi.reimburse.domain.SysReimburseDetail;
+import com.ruoyi.reimburse.domain.*;
 import com.ruoyi.reimburse.mapper.SysReimburseMapper;
 import com.ruoyi.reimburse.service.ISysReimburseAttachmentService;
 import com.ruoyi.reimburse.service.ISysReimburseDetailService;
@@ -35,6 +35,7 @@ public class SysReimburseServiceImpl implements ISysReimburseService
     @Autowired
     private ISysReimburseAttachmentService sysReimburseAttachmentService;
 
+    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
     /**
      * 查询报销申请单主
      *
@@ -164,5 +165,58 @@ public class SysReimburseServiceImpl implements ISysReimburseService
     @Override
     public int submitReimburse(Long reimburseId) {
         return sysReimburseMapper.submitReimburse(reimburseId);
+    }
+
+    @Override
+    public List<TravelStatistic> getTravelStatistics(String startMonth, String endMonth) {
+        List<SysReimburse> reimList = sysReimburseMapper.getTravelStatistics(startMonth, endMonth);
+        if (reimList == null || reimList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Map<String, List<SysReimburse>> groupByCreateBy = reimList.stream()
+                .filter(reimburse -> reimburse.getCreateBy() != null) // 过滤nickName为空的记录
+                .collect(Collectors.groupingBy(SysReimburse::getCreateBy));
+
+        // 2. 遍历分组，组装TravelStatistic
+        List<TravelStatistic> travelStatisticList = new ArrayList<>();
+        for (Map.Entry<String, List<SysReimburse>> entry : groupByCreateBy.entrySet()) {
+            String userName = entry.getKey();
+            List<SysReimburse> groupList = entry.getValue();
+
+            // 2.1 转换为TravelPeriod列表
+            List<TravelPeriod> travelPeriodList = groupList.stream()
+                    .map(this::convertToTravelPeriod)
+                    .collect(Collectors.toList());
+
+            // 2.2 创建TravelStatistic并赋值
+            TravelStatistic travelStatistic = new TravelStatistic();
+            travelStatistic.setCreateBy(userName);
+            travelStatistic.setTravelPeriodList(travelPeriodList);
+            // 若需要设置createBy，可从分组内的SysReimburse取（此处取第一个非空值）
+            Optional<String> nickName = groupList.stream()
+                    .map(SysReimburse::getNickName)
+                    .filter(Objects::nonNull)
+                    .findFirst();
+            nickName.ifPresent(travelStatistic::setNickName);
+
+            travelStatisticList.add(travelStatistic);
+        }
+        return travelStatisticList;
+    }
+    private TravelPeriod convertToTravelPeriod(SysReimburse reimburse) {
+        TravelPeriod travelPeriod = new TravelPeriod();
+
+        // 日期转换：Date -> String（处理null值）
+        if (reimburse.getStartTime() != null) {
+            travelPeriod.setStartTime(DATE_FORMATTER.format(reimburse.getStartTime()));
+        }
+        if (reimburse.getEndTime() != null) {
+            travelPeriod.setEndTime(DATE_FORMATTER.format(reimburse.getEndTime()));
+        }
+
+        // 金额直接赋值
+        travelPeriod.setTotalAmount(reimburse.getTotalAmount());
+
+        return travelPeriod;
     }
 }

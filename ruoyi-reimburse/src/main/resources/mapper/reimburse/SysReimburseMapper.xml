@@ -122,4 +122,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <update id="submitReimburse">
         update sys_reimburse set process_status = 'APPROVING',submit_time = NOW() where reimburse_id = #{reimburseId}
     </update>
+    <select id="getTravelStatistics" resultMap="SysReimburseResult">
+        SELECT
+        sr.create_by,
+        su.nick_name,
+        CASE
+        WHEN sr.start_time &lt; STR_TO_DATE(#{startMonth}, '%Y-%m-%d')
+        THEN STR_TO_DATE(#{startMonth}, '%Y-%m-%d')
+        ELSE sr.start_time
+        END AS start_time,
+        CASE
+        WHEN sr.end_time &gt; LAST_DAY(STR_TO_DATE(#{endMonth}, '%Y-%m-%d'))
+        THEN LAST_DAY(STR_TO_DATE(#{endMonth}, '%Y-%m-%d'))
+        ELSE sr.end_time
+        END AS end_time,
+        sr.total_amount
+        FROM sys_reimburse sr
+        LEFT JOIN sys_user su ON sr.create_by = su.user_name
+        WHERE
+        start_time &lt;= LAST_DAY(STR_TO_DATE(#{endMonth}, '%Y-%m-%d'))
+        AND end_time &gt;= STR_TO_DATE(#{startMonth}, '%Y-%m-%d')
+    </select>
 </mapper>

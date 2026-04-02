@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.reimburse.domain.ReimburseRequest;
 import com.ruoyi.reimburse.domain.SysReimburse;
+import com.ruoyi.reimburse.domain.TravelStatistic;
 import com.ruoyi.reimburse.service.ISysReimburseService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,9 +128,11 @@ public class SysReimburseController extends BaseController
     }
 
     @GetMapping("/travelStatistics")
-    public AjaxResult getTravelStatistics(@RequestParam(value = "month", required = true) String month) {
-
-        return AjaxResult.success(true);
+    public TableDataInfo getTravelStatistics(@RequestParam(value = "startMonth", required = true) String startMonth,@RequestParam(value = "endMonth", required = true) String endMonth) {
+        List<TravelStatistic> list = sysReimburseService.getTravelStatistics(startMonth+"-1",endMonth+"-1");
+        return getDataTable(list);
     }
+
+
 
 }

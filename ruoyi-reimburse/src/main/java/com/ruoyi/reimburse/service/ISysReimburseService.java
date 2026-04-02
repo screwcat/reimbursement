@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.ruoyi.reimburse.domain.ReimburseRequest;
 import com.ruoyi.reimburse.domain.SysReimburse;
+import com.ruoyi.reimburse.domain.TravelStatistic;
 
 /**
  * 报销申请单主Service接口
@@ -68,4 +69,6 @@ public interface ISysReimburseService
     public int changeProcessState(Long reimburseId, String processState);
 
     public int submitReimburse(Long reimburseId);
+
+    public List<TravelStatistic> getTravelStatistics(String startMonth, String endMonth);
 }

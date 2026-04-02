@@ -1,16 +1,19 @@
 <template>
-  <div id="gantt-chart" style="width: 100%; height: 400px;"></div>
+  <div class="chart-wrapper">
+    <h2>员工出差日程甘特图</h2>
+    <div ref="chart" style="width: 100%; height: 500px;"></div>
+  </div>
 </template>
 
 <script>
-// ECharts 5.x 正确引入方式（统一入口）
 import * as echarts from 'echarts';
 
 export default {
-  name: "TravelGanttWithEcharts",
+  name: 'TravelGantt',
   data() {
     return {
-      chart: null,
+      chartInstance: null,
+      // 原始数据
       retData: [
         {
           employeeName: "张三",
@@ -33,136 +36,121 @@ export default {
           travelPeriods: [
             { startDay: 2, endDay: 7 },
             { startDay: 11, endDay: 19 },
-            { startDay: 22, endDay: 25 }
+            { startDay: 22, endDay: 29 }
           ]
         }
-      ]
+      ],
+      // 定义每个员工对应的颜色
+      colorMap: {
+        "张三": "#6faed9", // 浅蓝色
+        "李四": "#f7c442", // 黄色
+        "王五": "#8bc34a"  // 绿色
+      }
     };
   },
   mounted() {
-    // 确保DOM完全渲染后初始化
-    this.$nextTick(() => {
-      this.initChart();
-    });
-  },
-  beforeDestroy() {
-    // 销毁图表，避免内存泄漏
-    if (this.chart) {
-      this.chart.dispose();
-      this.chart = null;
-    }
+    this.initChart();
   },
   methods: {
-    // 生成随机浅色系颜色
-    getRandomLightColor() {
-      const r = Math.floor(150 + Math.random() * 105);
-      const g = Math.floor(150 + Math.random() * 105);
-      const b = Math.floor(150 + Math.random() * 105);
-      return `rgb(${r}, ${g}, ${b})`;
-    },
+    initChart() {
+      this.chartInstance = echarts.init(this.$refs.chart);
 
-    // 转换数据为ECharts格式
-    transformData() {
-      const echartsData = [];
-      const employeeColors = {};
-
-      // 为每个员工分配唯一颜色
-      this.retData.forEach(emp => {
-        employeeColors[emp.employeeName] = this.getRandomLightColor();
-      });
-
-      // 遍历出差时段生成ECharts数据
-      this.retData.forEach(emp => {
-        emp.travelPeriods.forEach(period => {
-          echartsData.push({
-            name: emp.employeeName,
-            value: [period.startDay, period.endDay, emp.employeeName],
-            itemStyle: {
-              color: employeeColors[emp.employeeName]
-            }
+      // 1. 数据处理：将层级数据扁平化为图表可用的格式
+      // 格式：[startDay, endDay, employeeName]
+      const chartData = [];
+      this.retData.forEach(item => {
+        item.travelPeriods.forEach(period => {
+          chartData.push({
+            name: item.employeeName,
+            value: [period.startDay, period.endDay, item.employeeName]
           });
         });
       });
 
-      return {
-        echartsData,
-        employeeNames: this.retData.map(emp => emp.employeeName)
-      };
-    },
+      // 提取员工姓名作为 Y 轴类目
+      const employeeNames = this.retData.map(item => item.employeeName);
 
-    // 初始化ECharts图表（适配5.4.0）
-    initChart() {
-      // 1. 校验DOM元素是否存在
-      const chartDom = document.getElementById('gantt-chart');
-      if (!chartDom) {
-        console.error('图表容器DOM不存在');
-        return;
-      }
-
-      // 2. 初始化图表（5.x 写法和4.x一致，只是引入方式不同）
-      this.chart = echarts.init(chartDom);
-      const { echartsData, employeeNames } = this.transformData();
-
-      // 3. 图表配置项（5.x 完全兼容4.x的配置）
       const option = {
-        grid: {
-          left: '80px',   // 避免姓名覆盖日期轴
-          right: '20px',
-          top: '30px',
-          bottom: '20px'
-        },
         tooltip: {
-          trigger: 'item',
-          formatter: params => {
-            const [startDay, endDay, name] = params.value;
-            return `${name}<br/>出差时段：${startDay}日 - ${endDay}日`;
+          formatter: function (params) {
+            const data = params.value;
+            return `${data[2]} : ${data[0]}日 - ${data[1]}日`;
           }
+        },
+        grid: {
+          left: '10%',
+          right: '5%',
+          top: '10%',
+          bottom: '10%'
         },
         xAxis: {
           type: 'value',
+          name: '日期',
           min: 1,
           max: 30,
-          axisLabel: { formatter: '{value}日' },
-          axisLine: { show: true },
-          splitLine: {
-            show: true,
-            lineStyle: { type: 'dashed' }
-          }
+          axisLabel: {
+            formatter: '{value}日'
+          },
+          splitLine: { show: false }
         },
         yAxis: {
           type: 'category',
           data: employeeNames,
-          axisLine: { show: true }
+          axisLine: { show: false },
+          axisTick: { show: false }
         },
         series: [
           {
-            name: '出差时段',
-            type: 'bar',
-            data: echartsData,
-            barWidth: '60%',    // 柱子高度
-            barCategoryGap: '20%',
-            itemStyle: { borderRadius: 2 }
+            name: '出差行程',
+            type: 'custom',
+            renderItem: (params, api) => {
+              // 获取当前数据项的 Y 轴坐标（对应员工姓名）
+              const yValue = api.value(2);
+              // 获取 StartDay 的 X 轴坐标
+              const startCoord = api.coord([api.value(0), yValue]);
+              // 获取 EndDay 的 X 轴坐标
+              const endCoord = api.coord([api.value(1), yValue]);
+
+              // 计算柱状图的高度
+              // api.size([width, height]) 返回像素尺寸，这里我们利用它计算单行的高度
+              const height = api.size([0, 1])[1] * 0.3; // 0.3 是柱子高度占行高的比例
+
+              return {
+                type: 'rect',
+                shape: {
+                  x: startCoord[0],
+                  y: startCoord[1] - height / 2,
+                  width: endCoord[0] - startCoord[0],
+                  height: height
+                },
+                style: api.style({
+                  // 根据员工姓名从 colorMap 中获取颜色
+                  fill: this.colorMap[yValue] || '#589eff',
+                  stroke: '#555' // 边框颜色
+                })
+              };
+            },
+            encode: {
+              x: [0, 1], // 使用 value 的第0项和第1项作为 x 范围
+              y: 2,      // 使用 value 的第2项（姓名）作为 y 轴
+              tooltip: [0, 1, 2]
+            },
+            data: chartData
           }
         ]
       };
 
-      // 4. 渲染图表
-      this.chart.setOption(option);
-
-      // 5. 自适应窗口大小
-      window.addEventListener('resize', () => {
-        this.chart && this.chart.resize();
-      });
+      this.chartInstance.setOption(option);
     }
   }
 };
 </script>
 
 <style scoped>
-#gantt-chart {
-  border: 1px solid #000;
-  box-sizing: border-box;
-  margin: 20px auto;
-  max-width: 1200px;
+.chart-wrapper {
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #589eff;
+  border-radius: 4px;
 }
 </style>

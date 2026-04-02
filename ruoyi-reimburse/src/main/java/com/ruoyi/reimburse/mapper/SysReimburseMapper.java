@@ -3,6 +3,7 @@ package com.ruoyi.reimburse.mapper;
 import java.util.List;
 
 import com.ruoyi.reimburse.domain.SysReimburse;
+import com.ruoyi.reimburse.domain.TravelStatistic;
 import org.apache.ibatis.annotations.Param;
 
 /**
@@ -64,4 +65,6 @@ public interface SysReimburseMapper
     public int changeProcessState(@Param("reimburseId")Long reimburseId, @Param("processStatus")String processStatus);
 
     public int submitReimburse(Long reimburseId);
+
+    public List<SysReimburse> getTravelStatistics(@Param("startMonth")String startMonth, @Param("endMonth")String endMonth);
 }
