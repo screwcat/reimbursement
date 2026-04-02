@@ -1,140 +1,258 @@
 <template>
   <div class="chart-wrapper">
     <h2>员工出差日程甘特图</h2>
+    <!-- 顶部：月份范围选择器 + 搜索按钮 -->
+    <div class="search-bar" style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+      <el-date-picker
+        v-model="dateRange"
+        type="monthrange"
+        range-separator="至"
+        start-placeholder="开始月份"
+        end-placeholder="结束月份"
+        format="yyyy-MM"
+        value-format="yyyy-MM"
+      ></el-date-picker>
+      <el-button type="primary" @click="fetchTravelData">搜索</el-button>
+    </div>
+
     <div ref="chart" style="width: 100%; height: 500px;"></div>
   </div>
 </template>
 
 <script>
 import * as echarts from 'echarts';
+import { getTravelStatistics } from "@/api/reimburse";
 
 export default {
-  name: 'TravelGantt',
+  name: "TravelStatistics",
   data() {
     return {
       chartInstance: null,
-      // 原始数据
-      retData: [
-        {
-          employeeName: "张三",
-          travelPeriods: [
-            { startDay: 1, endDay: 8 },
-            { startDay: 11, endDay: 19 },
-            { startDay: 22, endDay: 29 }
-          ]
-        },
-        {
-          employeeName: "李四",
-          travelPeriods: [
-            { startDay: 3, endDay: 12 },
-            { startDay: 15, endDay: 23 },
-            { startDay: 27, endDay: 30 }
-          ]
-        },
-        {
-          employeeName: "王五",
-          travelPeriods: [
-            { startDay: 2, endDay: 7 },
-            { startDay: 11, endDay: 19 },
-            { startDay: 22, endDay: 29 }
-          ]
-        }
-      ],
-      // 定义每个员工对应的颜色
+      // 接口返回数据
+      retData: [],
+      // 月份范围选择器绑定 - 默认当前月
+      dateRange: this.getDefaultMonthRange(),
       colorMap: {
-        "张三": "#6faed9", // 浅蓝色
-        "李四": "#f7c442", // 黄色
-        "王五": "#8bc34a"  // 绿色
-      }
+        "系统管理员": "#6faed9",
+        "张巍": "#f7c442"
+      },
+      // 存储查询范围的日期刻度（如["3/1", "3/2"... "4/30"]）
+      dateScale: []
     };
   },
   mounted() {
     this.initChart();
+    // 页面加载后自动加载数据
+    this.fetchTravelData();
+    window.addEventListener('resize', this.resizeChart);
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.resizeChart);
+    if (this.chartInstance) {
+      this.chartInstance.dispose();
+    }
   },
   methods: {
+    // 获取默认月份范围（当前月）
+    getDefaultMonthRange() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const monthStr = month < 10 ? `0${month}` : month;
+      const currentMonth = `${year}-${monthStr}`;
+      // 月份范围选择器需要数组格式 [开始月, 结束月]
+      return [currentMonth, currentMonth];
+    },
+    // 图表自适应
+    resizeChart() {
+      this.chartInstance && this.chartInstance.resize();
+    },
+    // 点击搜索调用接口（改用.then方式）
+    fetchTravelData() {
+      // 构造参数
+      const params = {
+        startMonth: this.dateRange?.[0] || "",
+        endMonth: this.dateRange?.[1] || ""
+      };
+      
+      // 调用后台接口（改用.then/.catch）
+      getTravelStatistics(params)
+        .then(res => {
+          // 把 rows 赋值给 retData
+          if (res && res.rows) {
+            this.retData = res.rows;
+          } else {
+            this.retData = [];
+          }
+          
+          // 重新渲染图表
+          this.initChart();
+        })
+        .catch(err => {
+          console.error("查询统计数据失败：", err);
+          this.$message.error("查询失败，请稍后重试");
+        });
+    },
+    // 日期解析
+    parseDateStr(dateStr) {
+      const date = new Date(dateStr);
+      return {
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        day: date.getDate(),
+        timestamp: date.getTime()
+      };
+    },
+    // 生成查询时间范围的所有日期刻度（核心修改）
+    generateDateScale() {
+      this.dateScale = [];
+      if (!this.dateRange || this.dateRange.length < 2) {
+        // 无查询条件时默认显示当月
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const lastDay = new Date(year, month, 0).getDate();
+        for (let day = 1; day <= lastDay; day++) {
+          this.dateScale.push(`${month}/${day}`);
+        }
+        return;
+      }
+
+      // 解析查询的开始/结束月份
+      const [startMonthStr, endMonthStr] = this.dateRange;
+      const [startYear, startMonth] = startMonthStr.split('-').map(Number);
+      const [endYear, endMonth] = endMonthStr.split('-').map(Number);
+
+      // 生成开始月份的所有日期
+      const startLastDay = new Date(startYear, startMonth, 0).getDate();
+      for (let day = 1; day <= startLastDay; day++) {
+        this.dateScale.push(`${startMonth}/${day}`);
+      }
+
+      // 生成中间月份（如果有）的所有日期（跨多月场景）
+      if (endMonth - startMonth > 1) {
+        for (let m = startMonth + 1; m < endMonth; m++) {
+          const lastDay = new Date(endYear, m, 0).getDate();
+          for (let day = 1; day <= lastDay; day++) {
+            this.dateScale.push(`${m}/${day}`);
+          }
+        }
+      }
+
+      // 生成结束月份的所有日期
+      if (startMonth !== endMonth) {
+        const endLastDay = new Date(endYear, endMonth, 0).getDate();
+        for (let day = 1; day <= endLastDay; day++) {
+          this.dateScale.push(`${endMonth}/${day}`);
+        }
+      }
+    },
+    // 转换出差日期到刻度索引
+    getDateIndex(month, day) {
+      const target = `${month}/${day}`;
+      return this.dateScale.findIndex(item => item === target);
+    },
+    // 初始化图表
     initChart() {
+      // 生成日期刻度
+      this.generateDateScale();
+
+      if (this.chartInstance) {
+        this.chartInstance.dispose();
+      }
       this.chartInstance = echarts.init(this.$refs.chart);
 
-      // 1. 数据处理：将层级数据扁平化为图表可用的格式
-      // 格式：[startDay, endDay, employeeName]
       const chartData = [];
       this.retData.forEach(item => {
-        item.travelPeriods.forEach(period => {
-          chartData.push({
-            name: item.employeeName,
-            value: [period.startDay, period.endDay, item.employeeName]
-          });
+        item.travelPeriodList.forEach(period => {
+          const start = this.parseDateStr(period.startTime);
+          const end = this.parseDateStr(period.endTime);
+          // 转换为刻度索引
+          const startIndex = this.getDateIndex(start.month, start.day);
+          const endIndex = this.getDateIndex(end.month, end.day);
+          
+          if (startIndex > -1 && endIndex > -1) {
+            chartData.push({
+              name: item.nickName,
+              value: [
+                startIndex,
+                endIndex,
+                item.nickName,
+                start.month,
+                end.month,
+                period.totalAmount,
+                start.day,
+                end.day
+              ]
+            });
+          }
         });
       });
 
-      // 提取员工姓名作为 Y 轴类目
-      const employeeNames = this.retData.map(item => item.employeeName);
+      const employeeNames = this.retData.map(item => item.nickName);
+      // 拼接X轴名称
+      const xAxisName = this.dateRange 
+        ? `${this.dateRange[0].split('-')[1]}月1日 - ${this.dateRange[1].split('-')[1]}月${new Date(this.dateRange[1].split('-')[0], this.dateRange[1].split('-')[1], 0).getDate()}日`
+        : `${new Date().getMonth() + 1}月 日期`;
 
       const option = {
         tooltip: {
-          formatter: function (params) {
-            const data = params.value;
-            return `${data[2]} : ${data[0]}日 - ${data[1]}日`;
+          formatter: params => {
+            const [sIndex, eIndex, name, sMonth, eMonth, amount, sDay, eDay] = params.value;
+            return `
+              <div>${name}</div>
+              <div>出差时间：${sMonth}月${sDay}日 - ${eMonth}月${eDay}日</div>
+              <div>总金额：${amount}元</div>
+            `;
           }
         },
-        grid: {
-          left: '10%',
-          right: '5%',
-          top: '10%',
-          bottom: '10%'
-        },
+        grid: { left: "10%", right: "5%", top: "10%", bottom: "20%" }, // 增加底部间距防止刻度被遮挡
         xAxis: {
-          type: 'value',
-          name: '日期',
-          min: 1,
-          max: 30,
+          type: "category",
+          name: xAxisName,
+          data: this.dateScale, // 绑定完整日期刻度
           axisLabel: {
-            formatter: '{value}日'
+            formatter: (value) => value, // 显示如"3/1" "4/30"
+            rotate: 45, // 旋转刻度避免重叠
+            interval: 0 // 显示所有刻度（可根据需要调整为1/2/3显示间隔）
           },
-          splitLine: { show: false }
+          splitLine: { show: false },
+          axisTick: {
+            alignWithLabel: true // 刻度线与标签对齐
+          }
         },
         yAxis: {
-          type: 'category',
+          type: "category",
           data: employeeNames,
           axisLine: { show: false },
           axisTick: { show: false }
         },
         series: [
           {
-            name: '出差行程',
-            type: 'custom',
+            name: "出差行程",
+            type: "custom",
             renderItem: (params, api) => {
-              // 获取当前数据项的 Y 轴坐标（对应员工姓名）
-              const yValue = api.value(2);
-              // 获取 StartDay 的 X 轴坐标
-              const startCoord = api.coord([api.value(0), yValue]);
-              // 获取 EndDay 的 X 轴坐标
-              const endCoord = api.coord([api.value(1), yValue]);
-
-              // 计算柱状图的高度
-              // api.size([width, height]) 返回像素尺寸，这里我们利用它计算单行的高度
-              const height = api.size([0, 1])[1] * 0.3; // 0.3 是柱子高度占行高的比例
+              const yVal = api.value(2);
+              const start = api.coord([api.value(0), yVal]);
+              const end = api.coord([api.value(1), yVal]);
+              const height = api.size([0, 1])[1] * 0.3;
 
               return {
-                type: 'rect',
+                type: "rect",
                 shape: {
-                  x: startCoord[0],
-                  y: startCoord[1] - height / 2,
-                  width: endCoord[0] - startCoord[0],
-                  height: height
+                  x: start[0],
+                  y: start[1] - height / 2,
+                  width: end[0] - start[0],
+                  height
                 },
                 style: api.style({
-                  // 根据员工姓名从 colorMap 中获取颜色
-                  fill: this.colorMap[yValue] || '#589eff',
-                  stroke: '#555' // 边框颜色
+                  fill: this.colorMap[yVal] || "#589eff",
+                  stroke: "#555",
+                  lineWidth: 1
                 })
               };
             },
-            encode: {
-              x: [0, 1], // 使用 value 的第0项和第1项作为 x 范围
-              y: 2,      // 使用 value 的第2项（姓名）作为 y 轴
-              tooltip: [0, 1, 2]
-            },
+            encode: { x: [0, 1], y: 2, tooltip: [0, 1, 2, 3, 4, 5, 6, 7] },
             data: chartData
           }
         ]
