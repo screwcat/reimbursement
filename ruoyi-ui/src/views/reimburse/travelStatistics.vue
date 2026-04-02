@@ -32,12 +32,18 @@ export default {
       dateRange: this.getDefaultMonthRange(),
       // 扩展配色映射，增加多员工适配
       colorMap: {
-        "系统管理员": "#6faed9",
-        "张巍": "#f7c442",
+        "0": "#6faed9",
+        "1": "#f7c442",
         "默认": "#589eff"
       },
       // 存储查询范围的日期刻度（如["3/1", "3/2"... "4/30"]）
-      dateScale: []
+      dateScale: [],
+      // 马卡龙色系基础色值（可根据需要扩展）
+      macaronBaseColors: [
+        '#FFC2E2', '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', 
+        '#BAE1FF', '#D9AEFC', '#FFC8DD', '#FFAFCC', '#BDE0FE', 
+        '#A2D2FF', '#F4ACB7', '#9D8189', '#8E9AAF', '#C8B6FF'
+      ],
     };
   },
   mounted() {
@@ -74,13 +80,15 @@ export default {
         startMonth: this.dateRange?.[0] || "",
         endMonth: this.dateRange?.[1] || ""
       };
-      
+
       // 调用后台接口（改用.then/.catch）
       getTravelStatistics(params)
         .then(res => {
           // 把 rows 赋值给 retData
           if (res && res.rows) {
+
             this.retData = res.rows;
+            this.colorMap = this.generateMacaronColorMap(this.retData.length);
           } else {
             this.retData = [];
           }
@@ -147,7 +155,7 @@ export default {
       const target = `${month}/${day}`;
       return this.dateScale.findIndex(item => item === target);
     },
-    // 初始化图表（核心样式改造）
+    // 初始化图表（核心：左边距调整 + X轴刻度改为1天）
     initChart() {
       // 生成日期刻度
       this.generateDateScale();
@@ -163,7 +171,7 @@ export default {
           // 转换为刻度索引
           const startIndex = this.getDateIndex(start.month, start.day);
           const endIndex = this.getDateIndex(end.month, end.day);
-          
+
           if (startIndex > -1 && endIndex > -1) {
             chartData.push({
               name: item.nickName,
@@ -183,7 +191,7 @@ export default {
       });
       const employeeNames = this.retData.map(item => item.nickName);
       // 拼接X轴名称
-      const xAxisName = this.dateRange 
+      const xAxisName = this.dateRange
         ? `${this.dateRange[0].split('-')[1]}月1日 - ${this.dateRange[1].split('-')[1]}月${new Date(this.dateRange[1].split('-')[0], this.dateRange[1].split('-')[1], 0).getDate()}日`
         : `${new Date().getMonth() + 1}月 日期`;
       const option = {
@@ -205,9 +213,9 @@ export default {
           boxShadow: '0 2px 12px 0 rgba(0,0,0,0.1)',
           textStyle: { color: '#333' }
         },
-        // 网格优化：增大左侧员工名称间距，底部预留更多刻度空间
-        grid: { left: "15%", right: "3%", top: "8%", bottom: "25%", containLabel: true },
-        // X轴样式优化
+        // 🌟 核心修改：左边距从15%改为8%，图表大幅左靠，其他边距微调
+        grid: { left: "2%", right: "8%", top: "8%", bottom: "25%", containLabel: true },
+        // X轴样式优化 - 核心：刻度改为1天显示
         xAxis: {
           type: "category",
           name: xAxisName,
@@ -215,34 +223,40 @@ export default {
           data: this.dateScale,
           axisLabel: {
             formatter: (value) => value,
-            rotate: 0, // 取消旋转，改为横向换行
-            interval: 2, // 每3个刻度显示一个，避免重叠
+            rotate: 45, // 🌟 增加旋转角度，避免日期标签重叠
+            interval: 0, // 🌟 关键修改：显示所有刻度（1天1个），默认interval:2是隔1天显示
             fontSize: 10,
-            color: '#666'
+            color: '#666',
+            align: 'center' // 标签居中对齐
           },
           axisLine: { lineStyle: { color: '#e6e6e6' } },
           axisTick: {
-            alignWithLabel: true,
+            alignWithLabel: true, // 刻度线与标签对齐
             lineStyle: { color: '#e6e6e6' }
           },
-          splitLine: { 
+          splitLine: {
             show: true,
-            lineStyle: { color: '#f5f5f5', type: 'dashed' } 
+            // 🌟 可选：如果需要加深网格线颜色，可修改这里
+            lineStyle: { color: '#dcdcdc', type: 'solid' }
           }
         },
-        // Y轴样式优化（员工名称）
+        // Y轴样式优化：微调内边距，适配左间距缩小
         yAxis: {
           type: "category",
           data: employeeNames,
           axisLabel: {
             fontSize: 12,
             color: '#333',
-            align: 'right', // 名称右对齐，贴近甘特图
-            padding: [0,0,0,10]
+            align: 'right',
+            padding: [0,0,0,5] // 🌟 内边距从10改为5，配合左间距缩小
           },
           axisLine: { show: false },
           axisTick: { show: false },
-          splitLine: { show: false } // 隐藏Y轴分割线
+          // 🌟 可选：如果需要显示行间横分割线，可打开下面配置
+          splitLine: {
+            show: true,
+            lineStyle: { color: '#dcdcdc', type: 'solid', width: 1 }
+          }
         },
         // 系列配置（核心甘特图样式）
         series: [
@@ -254,7 +268,7 @@ export default {
               const yVal = api.value(2);
               const start = api.coord([api.value(0), yVal]);
               const end = api.coord([api.value(1), yVal]);
-              const height = api.size([0, 1])[1] * 0.6; // 增大任务条高度，更醒目
+              const height = api.size([0, 1])[1] * 0.6;
               // 取配色，无映射则用默认色
               const baseColor = this.colorMap[yVal] || this.colorMap["默认"];
               return {
@@ -262,17 +276,17 @@ export default {
                 shape: {
                   x: start[0],
                   y: start[1] - height / 2,
-                  width: end[0] - start[0] || 20, // 避免单日出差宽度为0
+                  width: end[0] - start[0] || 20,
                   height,
-                  r: 4 // 圆角处理，核心样式优化
+                  r: 4
                 },
                 style: api.style({
                   fill: baseColor,
                   stroke: '#fff',
-                  lineWidth: 2, // 白色描边，增加层次感
+                  lineWidth: 2,
                   // 悬停高亮样式
                   emphasis: {
-                    fill: echarts.color.lift(baseColor, 0.2), // 悬停变亮
+                    fill: echarts.color.lift(baseColor, 0.2),
                     stroke: '#409eff',
                     lineWidth: 2,
                     shadowBlur: 6,
@@ -293,7 +307,53 @@ export default {
         textStyle: { fontFamily: 'Microsoft YaHei' }
       };
       this.chartInstance.setOption(option);
-    }
+    },
+    // 生成随机马卡龙颜色（核心新增方法）
+    generateMacaronColorMap(length) {
+      const colorMap = {};
+      // 如果需要的颜色数量超过基础色库，循环使用并微调亮度
+      for (let i = 0; i < length; i++) {
+        // let baseColor = this.macaronBaseColors[i % this.macaronBaseColors.length];
+        // // 对超出基础色库的颜色进行轻微亮度调整，避免完全重复
+        // if (i >= this.macaronBaseColors.length) {
+        //   const hueStep = Math.floor(Math.random() * 10) - 5; // 亮度微调值
+        //   baseColor = this.adjustColorBrightness(baseColor, hueStep);
+        // }
+        colorMap[i] = this.getRandomLightColor();
+      }
+      // 保留默认色（可选）
+      colorMap['默认'] = '#589eff';
+      return colorMap;
+    },
+    // 调整颜色亮度（辅助方法）
+    adjustColorBrightness(color, step) {
+      // 解析十六进制颜色为RGB
+      const rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+      if (!rgb) return color;
+      
+      let r = parseInt(rgb[1], 16);
+      let g = parseInt(rgb[2], 16);
+      let b = parseInt(rgb[3], 16);
+      
+      // 调整亮度，确保在0-255范围内
+      r = Math.max(0, Math.min(255, r + step));
+      g = Math.max(0, Math.min(255, g + step));
+      b = Math.max(0, Math.min(255, b + step));
+      
+      // 转回十六进制
+      const toHex = (val) => val.toString(16).padStart(2, '0');
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    },
+    // 生成随机浅色系RGB颜色，返回十六进制格式
+    getRandomLightColor() {
+      const r = Math.floor(150 + Math.random() * 105);
+      const g = Math.floor(150 + Math.random() * 105);
+      const b = Math.floor(150 + Math.random() * 105);
+
+      // 转为两位十六进制，并拼接成 #RRGGBB 格式
+      const toHex = (c) => c.toString(16).padStart(2, '0');
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    },
   }
 };
 </script>
