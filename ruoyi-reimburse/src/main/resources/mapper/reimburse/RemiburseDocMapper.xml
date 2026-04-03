@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.reimburse.mapper.RemiburseDocMapper">
+
+    <resultMap type="RemiburseDoc" id="RemiburseDocResult">
+        <result property="docId"    column="doc_id"    />
+        <result property="billNo"    column="bill_no"    />
+        <result property="userName"    column="user_name"    />
+        <result property="monthSelect"    column="month_select"    />
+        <result property="ticketTotal"    column="ticket_total"    />
+        <result property="totalAmount"    column="total_amount"    />
+        <result property="remark"    column="remark"    />
+        <result property="submitTime"    column="submit_time"    />
+        <result property="processStatus"    column="process_status"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectRemiburseDocVo">
+        select doc_id, bill_no, user_name, month_select, ticket_total, total_amount, remark, submit_time, process_status, create_time from remiburse_doc
+    </sql>
+
+    <select id="selectRemiburseDocList" parameterType="RemiburseDoc" resultMap="RemiburseDocResult">
+        <include refid="selectRemiburseDocVo"/>
+        <where>
+            <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
+            <if test="monthSelect != null  and monthSelect != ''"> and month_select = #{monthSelect}</if>
+            <if test="ticketTotal != null "> and ticket_total = #{ticketTotal}</if>
+            <if test="totalAmount != null "> and total_amount = #{totalAmount}</if>
+            <if test="submitTime != null "> and submit_time = #{submitTime}</if>
+            <if test="processStatus != null  and processStatus != ''"> and process_status = #{processStatus}</if>
+        </where>
+    </select>
+
+    <select id="selectRemiburseDocByDocId" parameterType="Long" resultMap="RemiburseDocResult">
+        <include refid="selectRemiburseDocVo"/>
+        where doc_id = #{docId}
+    </select>
+
+    <insert id="insertRemiburseDoc" parameterType="RemiburseDoc" useGeneratedKeys="true" keyProperty="docId">
+        insert into remiburse_doc
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="billNo != null">bill_no,</if>
+            <if test="userName != null and userName != ''">user_name,</if>
+            <if test="monthSelect != null and monthSelect != ''">month_select,</if>
+            <if test="ticketTotal != null">ticket_total,</if>
+            <if test="totalAmount != null">total_amount,</if>
+            <if test="remark != null">remark,</if>
+            <if test="submitTime != null">submit_time,</if>
+            <if test="processStatus != null and processStatus != ''">process_status,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="billNo != null">#{billNo},</if>
+            <if test="userName != null and userName != ''">#{userName},</if>
+            <if test="monthSelect != null and monthSelect != ''">#{monthSelect},</if>
+            <if test="ticketTotal != null">#{ticketTotal},</if>
+            <if test="totalAmount != null">#{totalAmount},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="submitTime != null">#{submitTime},</if>
+            <if test="processStatus != null and processStatus != ''">#{processStatus},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateRemiburseDoc" parameterType="RemiburseDoc">
+        update remiburse_doc
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="billNo != null">bill_no = #{billNo},</if>
+            <if test="userName != null and userName != ''">user_name = #{userName},</if>
+            <if test="monthSelect != null and monthSelect != ''">month_select = #{monthSelect},</if>
+            <if test="ticketTotal != null">ticket_total = #{ticketTotal},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="submitTime != null">submit_time = #{submitTime},</if>
+            <if test="processStatus != null and processStatus != ''">process_status = #{processStatus},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where doc_id = #{docId}
+    </update>
+
+    <delete id="deleteRemiburseDocByDocId" parameterType="Long">
+        delete from remiburse_doc where doc_id = #{docId}
+    </delete>
+
+    <delete id="deleteRemiburseDocByDocIds" parameterType="String">
+        delete from remiburse_doc where doc_id in
+        <foreach item="docId" collection="array" open="(" separator="," close=")">
+            #{docId}
+        </foreach>
+    </delete>
+</mapper>

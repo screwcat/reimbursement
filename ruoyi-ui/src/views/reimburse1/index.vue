@@ -160,63 +160,11 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
-
-    <!-- 添加或修改报销申请单主对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="单据编号" prop="billNo">
-          <el-input v-model="form.billNo" placeholder="请输入单据编号" />
-        </el-form-item>
-        <el-form-item label="开始时间" prop="startTime">
-          <el-date-picker clearable
-            v-model="form.startTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择开始时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="结束时间" prop="endTime">
-          <el-date-picker clearable
-            v-model="form.endTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择结束时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="月度选择(如2024-05)" prop="monthSelect">
-          <el-input v-model="form.monthSelect" placeholder="请输入月度选择(如2024-05)" />
-        </el-form-item>
-        <el-form-item label="票据总数" prop="ticketTotal">
-          <el-input v-model="form.ticketTotal" placeholder="请输入票据总数" />
-        </el-form-item>
-        <el-form-item label="票据总金额" prop="totalAmount">
-          <el-input v-model="form.totalAmount" placeholder="请输入票据总金额" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="提交时间" prop="submitTime">
-          <el-date-picker clearable
-            v-model="form.submitTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择提交时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="删除标志" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标志" />
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listReimburse, getReimburse, delReimburse, addReimburse, updateReimburse } from "@/api/reimburse1"
+import { listReimburse, getReimburse, delReimburse } from "@/api/reimburse1"
 
 export default {
   name: "Reimburse",
@@ -236,10 +184,6 @@ export default {
       total: 0,
       // 报销申请单主表格数据
       reimburseList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -253,9 +197,7 @@ export default {
         submitTime: null,
         processStatus: null,
       },
-      // 表单参数
-      form: {},
-      // 表单校验
+      // 表单校验（仅保留查询表单可能用到的，弹窗相关已移除）
       rules: {
         billNo: [
           { required: true, message: "单据编号不能为空", trigger: "blur" }
@@ -294,32 +236,6 @@ export default {
         this.loading = false
       })
     },
-    // 取消按钮
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        reimburseId: null,
-        billNo: null,
-        startTime: null,
-        endTime: null,
-        monthSelect: null,
-        ticketTotal: null,
-        totalAmount: null,
-        remark: null,
-        submitTime: null,
-        processStatus: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        delFlag: null
-      }
-      this.resetForm("form")
-    },
     /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1
@@ -336,46 +252,36 @@ export default {
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
-    /** 新增按钮操作 */
+    /** 新增按钮操作 - 跳转到编辑页 */
     handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = "添加报销申请单主"
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset()
-      const reimburseId = row.reimburseId || this.ids
-      getReimburse(reimburseId).then(response => {
-        this.form = response.data
-        this.open = true
-        this.title = "修改报销申请单主"
+      this.$router.push({
+        path: 'edit', // 请根据实际路由配置调整路径
+        query: { type: 'add' }
       })
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.reimburseId != null) {
-            updateReimburse(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功")
-              this.open = false
-              this.getList()
-            })
-          } else {
-            addReimburse(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功")
-              this.open = false
-              this.getList()
-            })
-          }
+    /** 修改按钮操作 - 跳转到编辑页并传递reimburseId */
+    handleUpdate(row) {
+      const reimburseId = row?.reimburseId || this.ids[0]
+      if (!reimburseId) {
+        this.$modal.msgError("请选择需要修改的报销单")
+        return
+      }
+      this.$router.push({
+        path: 'edit', // 请根据实际路由配置调整路径
+        query: { 
+          type: 'edit',
+          reimburseId: reimburseId 
         }
       })
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const reimburseIds = row.reimburseId || this.ids
-      this.$modal.confirm('是否确认删除报销申请单主编号为"' + reimburseIds + '"的数据项？').then(function() {
+      const reimburseIds = row?.reimburseId || this.ids
+      if (!reimburseIds || reimburseIds.length === 0) {
+        this.$modal.msgError("请选择需要删除的报销单")
+        return
+      }
+      this.$modal.confirm('是否确认删除报销申请单主编号为"' + reimburseIds + '"的数据项？').then(() => {
         return delReimburse(reimburseIds)
       }).then(() => {
         this.getList()
