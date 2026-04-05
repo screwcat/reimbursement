@@ -126,7 +126,6 @@
       <el-table-column label="月度选择(如2024-05)" align="center" prop="monthSelect" />
       <el-table-column label="票据总数" align="center" prop="ticketTotal" />
       <el-table-column label="票据总金额" align="center" prop="totalAmount" />
-      <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="提交时间" align="center" prop="submitTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.submitTime, '{y}-{m}-{d}') }}</span>

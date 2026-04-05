@@ -6,11 +6,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <resultMap type="SysReimburse" id="SysReimburseResult">
         <result property="reimburseId"    column="reimburse_id"    />
-        <result property="billNo"    column="bill_no"    />
         <result property="startTime"    column="start_time"    />
         <result property="endTime"    column="end_time"    />
-        <result property="monthSelect"    column="month_select"    />
-        <result property="ticketTotal"    column="ticket_total"    />
         <result property="totalAmount"    column="total_amount"    />
         <result property="remark"    column="remark"    />
         <result property="submitTime"    column="submit_time"    />
@@ -24,17 +21,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectSysReimburseVo">
-        select sr.reimburse_id, bill_no, start_time, end_time, month_select, ticket_total, sum_amount total_amount, sr.remark, submit_time, process_status, sr.create_by, sr.create_time, sr.update_by, sr.update_time, sr.del_flag,nick_name from sys_reimburse sr LEFT JOIN (SELECT reimburse_id,SUM(amount)sum_amount FROM sys_reimburse_detail GROUP BY reimburse_id)srd ON sr.reimburse_id = srd.reimburse_id LEFT JOIN sys_user sy ON sr.create_by = sy.user_name
+        SELECT sr.reimburse_id, doc_id, start_time, end_time,  COALESCE(amount,0)total_amount,COALESCE(ticketTotal,0)ticketTotal, sr.remark, sr.create_by, sr.create_time, sr.update_by, sr.update_time, sr.del_flag FROM sys_reimburse sr LEFT JOIN (SELECT reimburse_id,SUM(amount)amount,SUM(ticket_num)ticketTotal FROM sys_reimburse_detail GROUP BY reimburse_id)srd ON sr.reimburse_id = srd.reimburse_id
     </sql>
 
     <select id="selectSysReimburseList" parameterType="SysReimburse" resultMap="SysReimburseResult">
         <include refid="selectSysReimburseVo"/>
         <where>
-            <if test="billNo != null  and billNo != ''"> and sr.bill_no LIKE CONCAT('%', #{billNo}, '%')</if>
+            <if test="docId != null  and docId != ''"> and sr.doc_id = #{docId}</if>
             <if test="startTime != null "> and sr.start_time = #{startTime}</if>
             <if test="endTime != null "> and sr.end_time = #{endTime}</if>
-            <if test="monthSelect != null  and monthSelect != ''"> and sr.month_select = #{monthSelect}</if>
-            <if test="ticketTotal != null "> and sr.ticket_total = #{ticketTotal}</if>
             <if test="totalAmount != null "> and sr.total_amount = #{totalAmount}</if>
             <if test="submitTime != null "> and sr.submit_time = #{submitTime}</if>
             <if test="processStatus != null  and processStatus != ''"> and sr.process_status = #{processStatus}</if>
@@ -51,15 +46,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <insert id="insertSysReimburse" parameterType="SysReimburse" useGeneratedKeys="true" keyProperty="reimburseId">
         insert into sys_reimburse
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            bill_no,
+            <if test="docId != null">doc_id,</if>
             <if test="startTime != null">start_time,</if>
             <if test="endTime != null">end_time,</if>
-            <if test="monthSelect != null and monthSelect != ''">month_select,</if>
-            <if test="ticketTotal != null">ticket_total,</if>
-            <if test="totalAmount != null">total_amount,</if>
             <if test="remark != null">remark,</if>
-            <if test="submitTime != null">submit_time,</if>
-            <if test="processStatus != null and processStatus != ''">process_status,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
@@ -67,15 +57,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="delFlag != null">del_flag,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            get_bill_no(),
+            <if test="docId != null">#{docId},</if>
             <if test="startTime != null">#{startTime},</if>
             <if test="endTime != null">#{endTime},</if>
-            <if test="monthSelect != null and monthSelect != ''">#{monthSelect},</if>
-            <if test="ticketTotal != null">#{ticketTotal},</if>
-            <if test="totalAmount != null">#{totalAmount},</if>
             <if test="remark != null">#{remark},</if>
-            <if test="submitTime != null">#{submitTime},</if>
-            <if test="processStatus != null and processStatus != ''">#{processStatus},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
@@ -87,15 +72,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <update id="updateSysReimburse" parameterType="SysReimburse">
         update sys_reimburse
         <trim prefix="SET" suffixOverrides=",">
-            <if test="billNo != null and billNo != ''">bill_no = #{billNo},</if>
+            <if test="docId != null and docId != ''">doc_id = #{docId},</if>
             <if test="startTime != null">start_time = #{startTime},</if>
             <if test="endTime != null">end_time = #{endTime},</if>
-            <if test="monthSelect != null and monthSelect != ''">month_select = #{monthSelect},</if>
-            <if test="ticketTotal != null">ticket_total = #{ticketTotal},</if>
-            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
             <if test="remark != null">remark = #{remark},</if>
-            <if test="submitTime != null">submit_time = #{submitTime},</if>
-            <if test="processStatus != null and processStatus != ''">process_status = #{processStatus},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
@@ -124,7 +104,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </update>
     <select id="getTravelStatistics" resultMap="SysReimburseResult">
         SELECT
-        sr.create_by,
+        rd.user_name create_by,
         su.nick_name,
         CASE
         WHEN sr.start_time &lt; STR_TO_DATE(#{startMonth}, '%Y-%m-%d')
@@ -136,9 +116,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         THEN LAST_DAY(STR_TO_DATE(#{endMonth}, '%Y-%m-%d'))
         ELSE sr.end_time
         END AS end_time,
-        sr.total_amount
+        COALESCE(srd.amount,0) total_amount
         FROM sys_reimburse sr
-        LEFT JOIN sys_user su ON sr.create_by = su.user_name
+        LEFT JOIN remiburse_doc rd ON rd.doc_id = sr.doc_id
+        LEFT JOIN (SELECT reimburse_id,SUM(amount)amount,COUNT(reimburse_id)bills_number FROM sys_reimburse_detail GROUP BY reimburse_id)srd ON sr.reimburse_id = srd.reimburse_id
+        LEFT JOIN sys_user su ON rd.user_name = su.user_name
         WHERE
         start_time &lt;= LAST_DAY(STR_TO_DATE(#{endMonth}, '%Y-%m-%d'))
         AND end_time &gt;= STR_TO_DATE(#{startMonth}, '%Y-%m-%d')

@@ -1,31 +1,35 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="用户名" prop="userName">
+      <el-form-item label="提交人" prop="userName">
         <el-input
           v-model="queryParams.userName"
-          placeholder="请输入用户名"
+          placeholder="请输入提交人"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item label="月度选择" prop="monthSelect">
-        <el-input
+        <el-date-picker
           v-model="queryParams.monthSelect"
-          placeholder="请输入月度选择"
-          clearable
-          @keyup.enter.native="handleQuery"
+          type="month"
+          placeholder="请选择月度"
+          format="yyyy-MM"
+          value-format="yyyy-MM"
+          style="width: 100%"
         />
       </el-form-item>
-      <el-form-item label="票据总数" prop="ticketTotal">
-        <el-input
-          v-model="queryParams.ticketTotal"
-          placeholder="请输入票据总数"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="流程状态" prop="processStatus">
+        <el-select v-model="queryParams.processStatus" placeholder="请选择流程状态" clearable>
+          <el-option
+            v-for="dict in dict.type.process_status"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="票据总金额" prop="totalAmount">
+      <!-- <el-form-item label="票据总金额" prop="totalAmount">
         <el-input
           v-model="queryParams.totalAmount"
           placeholder="请输入票据总金额"
@@ -40,7 +44,7 @@
           value-format="yyyy-MM-dd"
           placeholder="请选择提交时间">
         </el-date-picker>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -58,7 +62,7 @@
           v-hasPermi="['system:doc:add']"
         >新增</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="success"
           plain
@@ -68,7 +72,7 @@
           @click="handleUpdate"
           v-hasPermi="['system:doc:edit']"
         >修改</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="danger"
@@ -95,34 +99,71 @@
 
     <el-table v-loading="loading" :data="docList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="单据id" align="center" prop="docId" />
+      <!-- <el-table-column label="单据id" align="center" prop="docId" /> -->
       <el-table-column label="单据编号" align="center" prop="billNo" />
-      <el-table-column label="用户名" align="center" prop="userName" />
-      <el-table-column label="月度选择" align="center" prop="monthSelect" />
-      <el-table-column label="票据总数" align="center" prop="ticketTotal" />
-      <el-table-column label="票据总金额" align="center" prop="totalAmount" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="提交时间" align="center" prop="submitTime" width="180">
+      <el-table-column label="提交人" align="center" prop="nickName" />
+      <el-table-column label="报销月度" align="center" prop="monthSelect" />
+      <el-table-column label="票据总数" align="center" prop="billsNumber" />
+      <el-table-column label="票据总金额" align="center" prop="amount">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.submitTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ scope.row.amount.toFixed(2) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="流程状态" align="center" prop="processStatus" />
+      <el-table-column label="创建时间" align="center" prop="createTime" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="提交时间" align="center" prop="submitTime" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.submitTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="流程状态" align="center" prop="processStatus">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.process_status" :value="scope.row.processStatus"/>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
             type="text"
             icon="el-icon-edit"
+            @click="handleUpdate1(scope.row)"
+            v-hasPermi="['system:doc:edit']"
+            v-if="scope.row.processStatus === 'DRAFT' || scope.row.processStatus === 'REJECTED'"
+          >修改</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-s-finance"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['system:doc:edit']"
-          >修改</el-button>
+          >明细</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-circle-check"
+            @click="handleSubmit(scope.row)"
+            v-hasPermi="['system:reimburse:submit']"
+            v-if="scope.row.processStatus === 'DRAFT' || scope.row.processStatus === 'REJECTED'"
+          >提交审批</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-circle-close"
+            @click="handleCancel(scope.row)"
+            v-hasPermi="['system:reimburse:cancel']"
+            v-if="scope.row.processStatus === 'SUBMITTED' || scope.row.processStatus === 'APPROVING'"
+          >撤销申请</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['system:doc:remove']"
+            v-if="scope.row.processStatus === 'DRAFT' || scope.row.processStatus === 'REJECTED'"
           >删除</el-button>
         </template>
       </el-table-column>
@@ -136,32 +177,39 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改报销单据主对话框 -->
+    <!-- 添加或修改报销单据对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="用户名" prop="userName">
+        <!-- <el-form-item label="提交人" prop="userName">
           <el-input v-model="form.userName" placeholder="请输入用户名" />
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="月度选择" prop="monthSelect">
-          <el-input v-model="form.monthSelect" placeholder="请输入月度选择" />
+          <el-date-picker
+            v-model="form.monthSelect"
+            type="month"
+            placeholder="请选择月度"
+            format="yyyy-MM"
+            value-format="yyyy-MM"
+            style="width: 100%"
+          />
         </el-form-item>
-        <el-form-item label="票据总数" prop="ticketTotal">
+        <!-- <el-form-item label="票据总数" prop="ticketTotal">
           <el-input v-model="form.ticketTotal" placeholder="请输入票据总数" />
         </el-form-item>
         <el-form-item label="票据总金额" prop="totalAmount">
           <el-input v-model="form.totalAmount" placeholder="请输入票据总金额" />
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
         </el-form-item>
-        <el-form-item label="提交时间" prop="submitTime">
+        <!-- <el-form-item label="提交时间" prop="submitTime">
           <el-date-picker clearable
             v-model="form.submitTime"
             type="date"
             value-format="yyyy-MM-dd"
             placeholder="请选择提交时间">
           </el-date-picker>
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -172,10 +220,11 @@
 </template>
 
 <script>
-import { listDoc, getDoc, delDoc, addDoc, updateDoc } from "@/api/reimburse1/doc"
+import { listDoc, getDoc, delDoc, addDoc, updateDoc, listSummary, submitReimburse, cancelReimburse } from "@/api/reimburse1/doc"
 
 export default {
   name: "Doc",
+  dicts: ['process_status'],
   data() {
     return {
       // 遮罩层
@@ -190,7 +239,7 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 报销单据主表格数据
+      // 报销单据表格数据
       docList: [],
       // 弹出层标题
       title: "",
@@ -215,7 +264,7 @@ export default {
           { required: true, message: "用户名不能为空", trigger: "blur" }
         ],
         monthSelect: [
-          { required: true, message: "月度选择不能为空", trigger: "blur" }
+          { required: true, message: "请选择月度", trigger: "blur" }
         ],
         ticketTotal: [
           { required: true, message: "票据总数不能为空", trigger: "blur" }
@@ -236,10 +285,10 @@ export default {
     this.getList()
   },
   methods: {
-    /** 查询报销单据主列表 */
+    /** 查询报销单据列表 */
     getList() {
       this.loading = true
-      listDoc(this.queryParams).then(response => {
+      listSummary(this.queryParams).then(response => {
         this.docList = response.rows
         this.total = response.total
         this.loading = false
@@ -286,16 +335,29 @@ export default {
     handleAdd() {
       this.reset()
       this.open = true
-      this.title = "添加报销单据主"
+      this.title = "添加报销单据"
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
+      const docId = row.docId || this.ids
+      if (!docId) {
+        this.$modal.msgError("请选择需要修改的报销单")
+        return
+      }
+      this.$router.push({
+        path: 'list', // 请根据实际路由配置调整路径
+        query: {
+          docId: docId,
+        }
+      })
+    },
+    handleUpdate1(row) {
       this.reset()
       const docId = row.docId || this.ids
       getDoc(docId).then(response => {
         this.form = response.data
         this.open = true
-        this.title = "修改报销单据主"
+        this.title = "修改报销单据"
       })
     },
     /** 提交按钮 */
@@ -318,10 +380,36 @@ export default {
         }
       })
     },
+    // 提交审批
+    handleSubmit(row) {
+      this.$confirm('确认提交审批吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        submitReimburse(row.docId).then(response => {
+          this.$modal.msgSuccess("提交成功");
+          this.getList();
+        });
+      }).catch(() => {});
+    },
+    // 撤销申请
+    handleCancel(row) {
+      this.$confirm('确认撤销申请吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        cancelReimburse(row.docId).then(response => {
+          this.$modal.msgSuccess("撤销成功");
+          this.getList();
+        });
+      }).catch(() => {});
+    },
     /** 删除按钮操作 */
     handleDelete(row) {
       const docIds = row.docId || this.ids
-      this.$modal.confirm('是否确认删除报销单据主编号为"' + docIds + '"的数据项？').then(function() {
+      this.$modal.confirm('是否确认删除选中的数据吗？').then(function() {
         return delDoc(docIds)
       }).then(() => {
         this.getList()
@@ -330,7 +418,7 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('system/doc/export', {
+      this.download('remiburseDoc', {
         ...this.queryParams
       }, `doc_${new Date().getTime()}.xlsx`)
     }

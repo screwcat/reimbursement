@@ -9,6 +9,14 @@ export function listReimburse(query) {
   })
 }
 
+export function listBydocId(query) {
+  return request({
+    url: '/reimburse/listBydocId',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询报销申请详细
 export function getReimburse(reimburseId) {
   return request({
@@ -52,22 +60,6 @@ export function delReimburse(reimburseIds) {
   })
 }
 
-// 提交审批
-export function submitReimburse(reimburseId) {
-  return request({
-    url: '/reimburse/submit/' + reimburseId,
-    method: 'post'
-  })
-}
-
-// 撤销申请
-export function cancelReimburse(reimburseId) {
-  return request({
-    url: '/reimburse/cancel/' + reimburseId,
-    method: 'post'
-  })
-}
-
 // 上传票据影像
 export function uploadAttachment(file) {
   return request({
@@ -78,7 +70,7 @@ export function uploadAttachment(file) {
 }
 export function changeProcessState(data) {
   return request({
-    url: '/reimburse/changeProcessState',
+    url: '/remiburseDoc/changeProcessState',
     method: 'post',
     data: data
   })

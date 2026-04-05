@@ -5,8 +5,10 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.reimburse.domain.ReimburseRequest;
+import com.ruoyi.reimburse.domain.RemiburseDoc;
 import com.ruoyi.reimburse.domain.SysReimburse;
 import com.ruoyi.reimburse.domain.TravelStatistic;
+import com.ruoyi.reimburse.service.IRemiburseDocService;
 import com.ruoyi.reimburse.service.ISysReimburseService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,9 @@ public class SysReimburseController extends BaseController
     @Autowired
     private ISysReimburseService sysReimburseService;
 
+    @Autowired
+    private IRemiburseDocService remiburseDocService;
+
     /**
      * 查询报销申请单主列表
      */
@@ -41,6 +46,20 @@ public class SysReimburseController extends BaseController
         startPage();
         List<SysReimburse> list = sysReimburseService.selectSysReimburseList(sysReimburse);
         return getDataTable(list);
+    }
+
+
+    @PreAuthorize("@ss.hasPermi('system:reimburse:list')")
+    @GetMapping("/listBydocId")
+    public AjaxResult listBydocId(@RequestParam(value = "docId")Long docId)
+    {
+        SysReimburse sysReimburse = new SysReimburse();
+        sysReimburse.setDocId(docId);
+        List<SysReimburse> list = sysReimburseService.selectSysReimburseList(sysReimburse);
+        AjaxResult result = success(list);
+        RemiburseDoc docInfo = remiburseDocService.selectRemiburseSummaryByDocId(docId);
+        result.put("docInfo", docInfo);
+        return result;
     }
 
     /**

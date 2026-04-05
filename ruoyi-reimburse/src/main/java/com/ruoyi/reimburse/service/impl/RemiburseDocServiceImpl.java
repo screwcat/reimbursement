@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.ruoyi.common.utils.SecurityUtils.*;
+
 /**
  * 报销单据主Service业务层处理
  *
@@ -33,6 +35,14 @@ public class RemiburseDocServiceImpl implements IRemiburseDocService
         return remiburseDocMapper.selectRemiburseDocByDocId(docId);
     }
 
+    @Override
+    public RemiburseDoc selectRemiburseSummaryByDocId(Long docId) {
+        RemiburseDoc remiburseDoc = new RemiburseDoc();
+        remiburseDoc.setDocId(docId);
+        return remiburseDocMapper.selectRemiburseDoclistSummary(remiburseDoc).get(0);
+    }
+
+
     /**
      * 查询报销单据主列表
      *
@@ -45,6 +55,14 @@ public class RemiburseDocServiceImpl implements IRemiburseDocService
         return remiburseDocMapper.selectRemiburseDocList(remiburseDoc);
     }
 
+    @Override
+    public List<RemiburseDoc> selectRemiburseDoclistSummary(RemiburseDoc remiburseDoc) {
+        if(!isAdmin()&&!hasRole("finance")){
+            remiburseDoc.setUserName(getUsername());
+        }
+        return remiburseDocMapper.selectRemiburseDoclistSummary(remiburseDoc);
+    }
+
     /**
      * 新增报销单据主
      *
@@ -55,6 +73,8 @@ public class RemiburseDocServiceImpl implements IRemiburseDocService
     public int insertRemiburseDoc(RemiburseDoc remiburseDoc)
     {
         remiburseDoc.setCreateTime(DateUtils.getNowDate());
+        remiburseDoc.setUserName(getUsername());
+        remiburseDoc.setProcessStatus("DRAFT");
         return remiburseDocMapper.insertRemiburseDoc(remiburseDoc);
     }
 
@@ -93,4 +113,15 @@ public class RemiburseDocServiceImpl implements IRemiburseDocService
     {
         return remiburseDocMapper.deleteRemiburseDocByDocId(docId);
     }
+
+    @Override
+    public int submitReimburse(Long docId) {
+        return remiburseDocMapper.submitReimburse(docId);
+    }
+
+    @Override
+    public int changeProcessState(Long docId, String processState) {
+        return remiburseDocMapper.changeProcessState(docId,processState);
+    }
+
 }

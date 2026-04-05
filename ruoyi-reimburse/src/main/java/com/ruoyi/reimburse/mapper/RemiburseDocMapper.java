@@ -1,6 +1,7 @@
 package com.ruoyi.reimburse.mapper;
 
 import com.ruoyi.reimburse.domain.RemiburseDoc;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -27,6 +28,8 @@ public interface RemiburseDocMapper
      * @return 报销单据主集合
      */
     public List<RemiburseDoc> selectRemiburseDocList(RemiburseDoc remiburseDoc);
+
+    public List<RemiburseDoc> selectRemiburseDoclistSummary(RemiburseDoc remiburseDoc);
 
     /**
      * 新增报销单据主
@@ -59,4 +62,7 @@ public interface RemiburseDocMapper
      * @return 结果
      */
     public int deleteRemiburseDocByDocIds(Long[] docIds);
+
+    public int submitReimburse(Long docId);
+    public int changeProcessState(@Param("docId")Long docId, @Param("processStatus")String processStatus);
 }

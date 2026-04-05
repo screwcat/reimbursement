@@ -22,34 +22,21 @@ public class SysReimburse extends BaseEntity
     /** 报销单ID */
     private Long reimburseId;
 
-    /** 单据编号 */
-    @Excel(name = "单据编号")
-    private String billNo;
-
-    @Excel(name = "提交人")
-    private String nickName;
+    private Long docId;
 
     /** 开始时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "开始时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date startTime;
 
+    private String nickName;
+
+    private BigDecimal totalAmount;
+
     /** 结束时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "结束时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date endTime;
-
-    /** 月度选择(如2024-05) */
-    @Excel(name = "月度")
-    private String monthSelect;
-
-    /** 票据总数 */
-    @Excel(name = "票据总数")
-    private Long ticketTotal;
-
-    /** 票据总金额 */
-    @Excel(name = "票据总金额")
-    private BigDecimal totalAmount;
 
     /** 提交时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -63,6 +50,8 @@ public class SysReimburse extends BaseEntity
     /** 删除标志（0代表存在 2代表删除） */
     private String delFlag;
 
+    private Long ticketTotal;
+
     public void setReimburseId(Long reimburseId)
     {
         this.reimburseId = reimburseId;
@@ -73,15 +62,6 @@ public class SysReimburse extends BaseEntity
         return reimburseId;
     }
 
-    public void setBillNo(String billNo)
-    {
-        this.billNo = billNo;
-    }
-
-    public String getBillNo()
-    {
-        return billNo;
-    }
 
     public void setStartTime(Date startTime)
     {
@@ -101,36 +81,6 @@ public class SysReimburse extends BaseEntity
     public Date getEndTime()
     {
         return endTime;
-    }
-
-    public void setMonthSelect(String monthSelect)
-    {
-        this.monthSelect = monthSelect;
-    }
-
-    public String getMonthSelect()
-    {
-        return monthSelect;
-    }
-
-    public void setTicketTotal(Long ticketTotal)
-    {
-        this.ticketTotal = ticketTotal;
-    }
-
-    public Long getTicketTotal()
-    {
-        return ticketTotal;
-    }
-
-    public void setTotalAmount(BigDecimal totalAmount)
-    {
-        this.totalAmount = totalAmount;
-    }
-
-    public BigDecimal getTotalAmount()
-    {
-        return totalAmount;
     }
 
     public void setSubmitTime(Date submitTime)
@@ -163,6 +113,13 @@ public class SysReimburse extends BaseEntity
         return delFlag;
     }
 
+    public Long getDocId() {
+        return docId;
+    }
+
+    public void setDocId(Long docId) {
+        this.docId = docId;
+    }
 
     public String getNickName() {
         return nickName;
@@ -172,16 +129,28 @@ public class SysReimburse extends BaseEntity
         this.nickName = nickName;
     }
 
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public Long getTicketTotal() {
+        return ticketTotal;
+    }
+
+    public void setTicketTotal(Long ticketTotal) {
+        this.ticketTotal = ticketTotal;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
             .append("reimburseId", getReimburseId())
-            .append("billNo", getBillNo())
             .append("startTime", getStartTime())
             .append("endTime", getEndTime())
-            .append("monthSelect", getMonthSelect())
-            .append("ticketTotal", getTicketTotal())
-            .append("totalAmount", getTotalAmount())
             .append("remark", getRemark())
             .append("submitTime", getSubmitTime())
             .append("processStatus", getProcessStatus())

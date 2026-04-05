@@ -1,6 +1,7 @@
 package com.ruoyi.reimburse.controller;
 
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.utils.poi.ExcelUtil;
@@ -29,7 +30,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * @date 2026-04-03
  */
 @RestController
-@RequestMapping("/system/doc")
+@RequestMapping("/remiburseDoc")
 public class RemiburseDocController extends BaseController
 {
     @Autowired
@@ -44,6 +45,15 @@ public class RemiburseDocController extends BaseController
     {
         startPage();
         List<RemiburseDoc> list = remiburseDocService.selectRemiburseDocList(remiburseDoc);
+        return getDataTable(list);
+    }
+
+    @PreAuthorize("@ss.hasPermi('system:doc:list')")
+    @GetMapping("/listSummary")
+    public TableDataInfo listSummary(RemiburseDoc remiburseDoc)
+    {
+        startPage();
+        List<RemiburseDoc> list = remiburseDocService.selectRemiburseDoclistSummary(remiburseDoc);
         return getDataTable(list);
     }
 
@@ -101,5 +111,26 @@ public class RemiburseDocController extends BaseController
     public AjaxResult remove(@PathVariable Long[] docIds)
     {
         return toAjax(remiburseDocService.deleteRemiburseDocByDocIds(docIds));
+    }
+
+    @Log(title = "提交审核", businessType = BusinessType.UPDATE)
+    @PostMapping("/submit/{docId}")
+    public AjaxResult submit(@PathVariable Long docId)
+    {
+        return toAjax(remiburseDocService.submitReimburse(docId));
+    }
+
+    @Log(title = "撤销申请", businessType = BusinessType.UPDATE)
+    @PostMapping("/cancel/{docId}")
+    public AjaxResult cancel(@PathVariable Long docId)
+    {
+        return toAjax(remiburseDocService.changeProcessState(docId,"DRAFT"));
+    }
+
+    @Log(title = "更改审核状态", businessType = BusinessType.INSERT)
+    @PostMapping("/changeProcessState")
+    public AjaxResult changeProcessState(@RequestBody Map<String, Object> sysReimburse)
+    {
+        return toAjax(remiburseDocService.changeProcessState(Long.valueOf(sysReimburse.get("docId").toString()),sysReimburse.get("processState").toString()));
     }
 }

@@ -1,5 +1,6 @@
 package com.ruoyi.reimburse.domain;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -40,14 +41,21 @@ public class RemiburseDoc extends BaseEntity
     private Long totalAmount;
 
     /** 提交时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "提交时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "提交时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date submitTime;
 
     /** 流程状态 */
     @Excel(name = "流程状态")
     private String processStatus;
 
+    /** 提交人 */
+    @Excel(name = "提交人")
+    private String nickName;
+
+    private int billsNumber;
+
+    private BigDecimal amount;
     public void setDocId(Long docId)
     {
         this.docId = docId;
@@ -126,6 +134,32 @@ public class RemiburseDoc extends BaseEntity
     public String getProcessStatus()
     {
         return processStatus;
+    }
+
+    public void setNickName(String nickName)
+    {
+        this.nickName = nickName;
+    }
+
+    public String getNickName()
+    {
+        return nickName;
+    }
+
+    public int getBillsNumber() {
+        return billsNumber;
+    }
+
+    public void setBillsNumber(int billsNumber) {
+        this.billsNumber = billsNumber;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 
     @Override

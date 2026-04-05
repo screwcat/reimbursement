@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :inline="true" :model="queryParams" class="demo-form-inline">
+    <!-- <el-form :inline="true" :model="queryParams" class="demo-form-inline">
       <el-form-item label="单据编号" prop="billNo">
         <el-input
           v-model="queryParams.billNo"
@@ -33,7 +33,14 @@
         <el-button type="primary" icon="el-icon-search" @click="handleQuery">查询</el-button>
         <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
-    </el-form>
+    </el-form> -->
+
+    <!-- 新增的卡片式信息区域 -->
+    <el-card class="info-card" shadow="hover" style="margin: 10px 0;">
+      <div style="font-size: 16px; font-weight: 500; line-height: 1.8;">
+        提交人：{{submitter}}；单据编号：{{ billNo }}； 月度选择：{{monthSelect}}；单据数量：{{billsNumber}}；总金额：￥{{amount}}；流程状态：{{processStatus}}；
+      </div>
+    </el-card>
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
@@ -44,6 +51,7 @@
           size="mini"
           @click="handleAdd"
           v-hasPermi="['system:reimburse:add']"
+          v-if="processStatus === 'DRAFT' || processStatus === 'REJECTED'"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -54,9 +62,10 @@
           size="mini"
           @click="handleDelete"
           v-hasPermi="['system:reimburse:remove']"
+          v-if="processStatus === 'DRAFT' || processStatus === 'REJECTED'"
         >删除</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="warning"
           plain
@@ -65,7 +74,7 @@
           @click="handleExport"
           v-hasPermi="['system:reimburse:export']"
         >导出</el-button>
-      </el-col>
+      </el-col> -->
     </el-row>
 
     <el-table
@@ -77,8 +86,8 @@
       highlight-current-row
     >
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="单据编号" align="center" prop="billNo" />
-      <el-table-column label="提交人" align="center" prop="nickName" />
+      <!-- <el-table-column label="单据编号" align="center" prop="billNo" />
+      <el-table-column label="提交人" align="center" prop="nickName" /> -->
       <el-table-column label="开始时间" align="center" prop="startTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>
@@ -90,13 +99,13 @@
         </template>
       </el-table-column>
       <el-table-column label="票据总数" align="center" prop="ticketTotal" />
-      <el-table-column label="月度" align="center" prop="monthSelect" />
+      <!-- <el-table-column label="月度" align="center" prop="monthSelect" /> -->
       <el-table-column label="票据总金额" align="center" prop="totalAmount">
         <template slot-scope="scope">
           <span>{{ scope.row.totalAmount.toFixed(2) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createTime" width="180">
+      <!-- <el-table-column label="创建时间" align="center" prop="createTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
@@ -109,7 +118,7 @@
       <el-table-column label="提交时间" align="center" prop="submitTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.submitTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-        </template>
+        </template> -->
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -118,6 +127,7 @@
             type="text"
             icon="el-icon-view"
             @click="handleView(scope.row)"
+            v-if="processStatus === 'APPROVING' || processStatus === 'APPROVED'"
             v-hasPermi="['system:reimburse:query']"
           >查看</el-button>
           <el-button
@@ -125,10 +135,10 @@
             type="text"
             icon="el-icon-edit"
             @click="handleEdit(scope.row)"
-            v-if="scope.row.processStatus === 'DRAFT' || scope.row.processStatus === 'REJECTED'"
+            v-if="processStatus === 'DRAFT' || processStatus === 'REJECTED'"
             v-hasPermi="['system:reimburse:edit']"
           >修改</el-button>
-          <el-button
+          <!-- <el-button
             size="mini"
             type="text"
             icon="el-icon-circle-check"
@@ -143,7 +153,7 @@
             @click="handleCancel(scope.row)"
             v-hasPermi="['system:reimburse:cancel']"
             v-if="scope.row.processStatus === 'SUBMITTED' || scope.row.processStatus === 'APPROVING'"
-          >撤销申请</el-button>
+          >撤销申请</el-button> -->
           <el-button
             size="mini"
             type="text"
@@ -156,13 +166,18 @@
       </el-table-column>
     </el-table>
 
-    <pagination
+    <!-- <pagination
       v-show="total>0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
-    />
+    /> -->
+    <div slot="footer" class="dialog-footer">
+      <el-button type="success" @click="reviewApprove" v-if="processStatus === 'APPROVING'" v-hasPermi="['system:reimburse:review']">审核通过</el-button>
+        <el-button type="warning" @click="reviewReject" v-if="processStatus === 'APPROVING'" v-hasPermi="['system:reimburse:review']">审核拒绝</el-button>
+      <el-button @click="returnMain">返 回</el-button>
+    </div>
 
     <!-- 新增/修改弹窗 -->
     <el-dialog
@@ -197,8 +212,6 @@
         :reimburse-id="viewReimburseId"
       />
       <div slot="footer" class="dialog-footer">
-        <el-button type="success" @click="reviewApprove" v-if="isReview" v-hasPermi="['system:reimburse:review']">审核通过</el-button>
-        <el-button type="warning" @click="reviewReject" v-if="isReview" v-hasPermi="['system:reimburse:review']">审核拒绝</el-button>
         <el-button @click="viewOpen = false">关 闭</el-button>
       </div>
     </el-dialog>
@@ -206,7 +219,7 @@
 </template>
 
 <script>
-import { listReimburse, getReimburse, delReimburse, submitReimburse, cancelReimburse } from "@/api/reimburse";
+import { listReimburse, listBydocId, delReimburse, changeProcessState } from "@/api/reimburse";
 import ReimburseForm from "./form";
 
 export default {
@@ -231,11 +244,16 @@ export default {
       viewOpen: false,
       // 是否为查看模式
       isView: false,
-      // 是否为审核模式
-      isReview: false,
       // 报销单ID
       reimburseId: null,
       viewReimburseId: null,
+      docId: null,
+      submitter:null,
+      monthSelect:null,
+      billNo:null,
+      billsNumber:null,
+      amount:0,
+      processStatus: null,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -247,15 +265,22 @@ export default {
     };
   },
   created() {
+    // 获取路由参数
+    this.docId = this.$route.query.docId
     this.getList();
   },
   methods: {
     // 获取列表
     getList() {
       this.loading = true;
-      listReimburse(this.queryParams).then((response) => {
-        this.reimburseList = response.rows;
-        this.total = response.total;
+      listBydocId({'docId':this.docId}).then((response) => {
+        this.reimburseList = response.data
+        this.amount = response.docInfo.amount
+        this.monthSelect = response.docInfo.monthSelect
+        this.submitter = response.docInfo.nickName
+        this.billNo = response.docInfo.billNo
+        this.billsNumber = response.docInfo.billsNumber
+        this.processStatus = response.docInfo.processStatus
         this.loading = false;
       });
     },
@@ -303,37 +328,9 @@ export default {
     handleView(row) {
       this.viewOpen = true;
       this.viewReimburseId = row.reimburseId;
-      this.isReview = row.processStatus === 'APPROVING'
-      console.log("查看报销单ID：", row.reimburseId);
       this.$nextTick(() => {
         this.$refs.reimburseViewForm.initForm(row.reimburseId);
       });
-    },
-    // 提交审批
-    handleSubmit(row) {
-      this.$confirm('确认提交审批吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        submitReimburse(row.reimburseId).then(response => {
-          this.$modal.msgSuccess("提交成功");
-          this.getList();
-        });
-      }).catch(() => {});
-    },
-    // 撤销申请
-    handleCancel(row) {
-      this.$confirm('确认撤销申请吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        cancelReimburse(row.reimburseId).then(response => {
-          this.$modal.msgSuccess("撤销成功");
-          this.getList();
-        });
-      }).catch(() => {});
     },
     // 单条删除
     handleDeleteOne(row) {
@@ -361,27 +358,77 @@ export default {
     },
     // 提交表单
     submitForm() {
-      this.$refs.reimburseForm.submitForm().then(() => {
+      this.$refs.reimburseForm.submitForm(this.docId).then(() => {
         this.open = false;
         this.getList();
       });
     },
     reviewApprove() {
-      this.$refs.reimburseViewForm.reviewApprove().then(() => {
-        this.viewOpen = false;
-        this.getList();
-      });
+      this.$confirm('确认通过该单据吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        return new Promise((resolve, reject) => {
+          const params = {
+                docId: this.docId,
+                processState: "APPROVED",
+              };
+          try {
+            changeProcessState(params).then(() => {
+                  this.$modal.msgSuccess("审核通过!");
+                  resolve();
+                  this.getList();
+                }).catch(error => {
+                  reject(error);
+                });
+          } catch (error) {
+              this.$modal.msgError("审核操作失败");
+              reject(error);
+          }
+        });
+      }).catch(() => {});
     },
     reviewReject() {
-      this.$refs.reimburseViewForm.reviewReject().then(() => {
-        this.viewOpen = false;
-        this.getList();
-      });
+      this.$confirm('确认驳回该单据吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        return new Promise((resolve, reject) => {
+          const params = {
+                docId: this.docId,
+                processState: "REJECTED",
+              };
+          try {
+            changeProcessState(params).then(() => {
+                  this.$modal.msgSuccess("审核拒绝!");
+                  resolve();
+                  this.getList();
+                }).catch(error => {
+                  reject(error);
+                });
+          } catch (error) {
+              this.$modal.msgError("审核操作失败");
+              reject(error);
+          }
+        });
+      }).catch(() => {});
     },
     // 取消按钮操作
     cancel() {
       this.open = false;
+    },
+    returnMain(){
+      this.$router.push({ path: 'docIndex' });
     }
   },
 };
 </script>
+
+<style scoped>
+/* 可选：给信息卡片添加自定义样式，增强视觉效果 */
+.info-card {
+  --el-card-padding: 15px;
+}
+</style>

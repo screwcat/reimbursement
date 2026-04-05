@@ -7,6 +7,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="RemiburseDoc" id="RemiburseDocResult">
         <result property="docId"    column="doc_id"    />
         <result property="billNo"    column="bill_no"    />
+        <result property="nickName"    column="nick_name"    />
+        <result property="billsNumber"    column="bills_number"    />
+        <result property="amount"    column="amount"    />
         <result property="userName"    column="user_name"    />
         <result property="monthSelect"    column="month_select"    />
         <result property="ticketTotal"    column="ticket_total"    />
@@ -18,7 +21,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectRemiburseDocVo">
-        select doc_id, bill_no, user_name, month_select, ticket_total, total_amount, remark, submit_time, process_status, create_time from remiburse_doc
+        SELECT doc_id, bill_no, user_name, month_select, remark, submit_time, process_status, create_time FROM remiburse_doc
     </sql>
 
     <select id="selectRemiburseDocList" parameterType="RemiburseDoc" resultMap="RemiburseDocResult">
@@ -37,11 +40,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectRemiburseDocVo"/>
         where doc_id = #{docId}
     </select>
+    <select id="selectRemiburseDoclistSummary" resultMap="RemiburseDocResult">
+        SELECT rd.doc_id,rd.bill_no,nick_name,rd.month_select,COALESCE(reim.amount,0)amount,COALESCE(bills_number,0)bills_number,rd.process_status,rd.submit_time,rd.create_time FROM remiburse_doc rd
+        LEFT JOIN sys_user su ON rd.user_name = su.user_name
+        LEFT JOIN (SELECT doc_id,SUM(srd.amount)amount,SUM(srd.bills_number)bills_number FROM sys_reimburse sr
+        LEFT JOIN (SELECT reimburse_id,SUM(amount)amount,SUM(ticket_num)bills_number FROM sys_reimburse_detail GROUP BY reimburse_id)srd ON sr.reimburse_id = srd.reimburse_id GROUP BY doc_id) reim ON reim.doc_id = rd.doc_id
+        <where>
+            <if test="docId != null  and docId != ''"> and rd.doc_id = #{docId}</if>
+            <if test="userName != null  and userName != ''"> and su.nick_name like concat('%', #{userName}, '%')</if>
+            <if test="monthSelect != null  and monthSelect != ''"> and rd.month_select = #{monthSelect}</if>
+            <if test="processStatus != null  and processStatus != ''"> and rd.process_status = #{processStatus}</if>
+        </where>
+    </select>
 
     <insert id="insertRemiburseDoc" parameterType="RemiburseDoc" useGeneratedKeys="true" keyProperty="docId">
         insert into remiburse_doc
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="billNo != null">bill_no,</if>
+            bill_no,
             <if test="userName != null and userName != ''">user_name,</if>
             <if test="monthSelect != null and monthSelect != ''">month_select,</if>
             <if test="ticketTotal != null">ticket_total,</if>
@@ -52,7 +67,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createTime != null">create_time,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="billNo != null">#{billNo},</if>
+            get_bill_no(),
             <if test="userName != null and userName != ''">#{userName},</if>
             <if test="monthSelect != null and monthSelect != ''">#{monthSelect},</if>
             <if test="ticketTotal != null">#{ticketTotal},</if>
@@ -78,6 +93,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createTime != null">create_time = #{createTime},</if>
         </trim>
         where doc_id = #{docId}
+    </update>
+    <update id="changeProcessState">
+        UPDATE remiburse_doc SET process_status = #{processStatus} where doc_id = #{docId}
+    </update>
+    <update id="submitReimburse">
+        UPDATE remiburse_doc SET process_status = 'APPROVING',submit_time = NOW() WHERE doc_id = #{docId}
     </update>
 
     <delete id="deleteRemiburseDocByDocId" parameterType="Long">

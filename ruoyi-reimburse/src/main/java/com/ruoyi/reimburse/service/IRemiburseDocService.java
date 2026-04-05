@@ -20,6 +20,8 @@ public interface IRemiburseDocService
      */
     public RemiburseDoc selectRemiburseDocByDocId(Long docId);
 
+    public RemiburseDoc selectRemiburseSummaryByDocId(Long docId);
+
     /**
      * 查询报销单据主列表
      *
@@ -27,6 +29,9 @@ public interface IRemiburseDocService
      * @return 报销单据主集合
      */
     public List<RemiburseDoc> selectRemiburseDocList(RemiburseDoc remiburseDoc);
+
+    public List<RemiburseDoc> selectRemiburseDoclistSummary(RemiburseDoc remiburseDoc);
+
 
     /**
      * 新增报销单据主
@@ -59,4 +64,8 @@ public interface IRemiburseDocService
      * @return 结果
      */
     public int deleteRemiburseDocByDocId(Long docId);
+
+    public int submitReimburse(Long docId);
+
+    public int changeProcessState(Long docId, String processState);
 }

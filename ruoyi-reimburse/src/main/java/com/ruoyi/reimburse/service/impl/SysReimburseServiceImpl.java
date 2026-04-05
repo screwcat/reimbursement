@@ -174,7 +174,7 @@ public class SysReimburseServiceImpl implements ISysReimburseService
             return Collections.emptyList();
         }
         Map<String, List<SysReimburse>> groupByCreateBy = reimList.stream()
-                .filter(reimburse -> reimburse.getCreateBy() != null) // 过滤nickName为空的记录
+                .filter(reimburse -> reimburse.getCreateBy() != null) // 过滤createBy为空的记录
                 .collect(Collectors.groupingBy(SysReimburse::getCreateBy));
 
         // 2. 遍历分组，组装TravelStatistic

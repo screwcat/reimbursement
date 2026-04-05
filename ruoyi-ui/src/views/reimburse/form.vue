@@ -30,19 +30,6 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="月度选择" prop="monthSelect">
-            <el-date-picker
-              v-model="form.monthSelect"
-              type="month"
-              placeholder="请选择月度"
-              format="yyyy-MM"
-              value-format="yyyy-MM"
-              style="width: 100%"
-              :disabled="isView"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
           <el-form-item label="票据总数" prop="ticketTotal">
             <el-input
               v-model="form.ticketTotal"
@@ -148,15 +135,6 @@
               :disabled="isView"
               precision="2"
               @change="calculateTotalAmount"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column label="住宿地点" align="center" prop="accommodation">
-          <template slot-scope="scope">
-            <el-input
-              v-model="scope.row.accommodation"
-              placeholder="请输入住宿地点"
-              :disabled="isView"
             />
           </template>
         </el-table-column>
@@ -295,11 +273,6 @@ export default {
         dateRange: [{ 
           required: true, 
           message: "时间范围不能为空", 
-          trigger: "change" 
-        }],
-        monthSelect: [{ 
-          required: true, 
-          message: "月度选择不能为空", 
           trigger: "change" 
         }],
         ticketTotal: [{ 
@@ -576,7 +549,7 @@ export default {
       document.body.removeChild(link);
     },
 
-    submitForm() {
+    submitForm(docId) {
       return new Promise((resolve, reject) => {
         this.$refs.form.validate((valid) => {
           if (valid) {
@@ -618,7 +591,7 @@ export default {
               this.form.startTime = this.form.dateRange[0];
               this.form.endTime = this.form.dateRange[1];
             }
-            
+            this.form.docId = docId;
             const params = {
               reimburse: this.form,
               detailList: this.detailList,
