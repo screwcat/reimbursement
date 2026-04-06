@@ -5,6 +5,7 @@ import java.util.List;
 import com.ruoyi.reimburse.domain.ReimburseRequest;
 import com.ruoyi.reimburse.domain.SysReimburse;
 import com.ruoyi.reimburse.domain.TravelStatistic;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * 报销申请单主Service接口
@@ -71,4 +72,6 @@ public interface ISysReimburseService
     public int submitReimburse(Long reimburseId);
 
     public List<TravelStatistic> getTravelStatistics(String startMonth, String endMonth);
+
+    public boolean checkTimePeriod(String startDate, String endDate, String userName);
 }

@@ -203,6 +203,7 @@ public class SysReimburseServiceImpl implements ISysReimburseService
         }
         return travelStatisticList;
     }
+
     private TravelPeriod convertToTravelPeriod(SysReimburse reimburse) {
         TravelPeriod travelPeriod = new TravelPeriod();
 
@@ -218,5 +219,14 @@ public class SysReimburseServiceImpl implements ISysReimburseService
         travelPeriod.setTotalAmount(reimburse.getTotalAmount());
 
         return travelPeriod;
+    }
+
+    @Override
+    public boolean checkTimePeriod(String startDate, String endDate, String userName) {
+        List<SysReimburse> list = sysReimburseMapper.checkTimePeriod(startDate, endDate, userName);
+        if(list.size()>0){
+            return false;
+        }
+        return true;
     }
 }

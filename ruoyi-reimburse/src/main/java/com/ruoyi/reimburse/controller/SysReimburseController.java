@@ -153,5 +153,9 @@ public class SysReimburseController extends BaseController
     }
 
 
+    @GetMapping("/checkTimePeriod")
+    public boolean checkTimePeriod(@RequestParam(value = "startDate", required = true) String startDate,@RequestParam(value = "endDate", required = true) String endDate,@RequestParam(value = "userName", required = true) String userName) {
+        return sysReimburseService.checkTimePeriod(startDate,endDate,userName);
+    }
 
 }

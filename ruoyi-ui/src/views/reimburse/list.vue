@@ -1,49 +1,54 @@
 <template>
   <div class="app-container">
-    <!-- <el-form :inline="true" :model="queryParams" class="demo-form-inline">
-      <el-form-item label="单据编号" prop="billNo">
-        <el-input
-          v-model="queryParams.billNo"
-          placeholder="请输入单据编号"
-          clearable
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="月度选择" prop="monthSelect">
-        <el-date-picker
-          v-model="queryParams.monthSelect"
-          type="month"
-          placeholder="请选择月度"
-          format="yyyy-MM"
-          value-format="yyyy-MM"
-          style="width: 100%"
-        />
-      </el-form-item>
-      <el-form-item label="流程状态" prop="processStatus">
-        <el-select v-model="queryParams.processStatus" placeholder="请选择流程状态" clearable>
-          <el-option
-            v-for="dict in dict.type.process_status"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" @click="handleQuery">查询</el-button>
-        <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form> -->
-
     <!-- 新增的卡片式信息区域 -->
-    <el-card class="info-card" shadow="hover" style="margin: 10px 0;">
-      <div style="font-size: 16px; font-weight: 500; line-height: 1.8;">
-        提交人：{{submitter}}；单据编号：{{ billNo }}； 月度选择：{{monthSelect}}；单据数量：{{billsNumber}}；总金额：￥{{amount}}；流程状态：{{processStatus}}；
-      </div>
+    <el-card class="info-card" shadow="hover" style="margin: 10px 0 20px 0;">
+      <el-form class="info-form" label-width="100px">
+        <el-row :gutter="20">
+          <!-- 第一行两列 -->
+          <el-col :span="12">
+            <el-form-item label="提交人：">
+              <span class="form-value">{{ submitter }}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="单据编号：">
+              <span class="form-value">{{ billNo }}</span>
+            </el-form-item>
+          </el-col>
+          <!-- 第二行两列 -->
+          <el-col :span="12">
+            <el-form-item label="月度选择：">
+              <span class="form-value">{{ monthSelect }}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="单据数量：">
+              <span class="form-value">{{ billsNumber }}</span>
+            </el-form-item>
+          </el-col>
+          <!-- 第三行两列 -->
+          <el-col :span="12">
+            <el-form-item label="总金额：">
+              <span class="form-value">￥{{ amount.toFixed(2) }}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="流程状态：">
+              <span class="form-value"><dict-tag :options="dict.type.process_status" :value="processStatus"/></span>
+            </el-form-item>
+          </el-col>
+          <!-- 备注独占一行（两列） -->
+          <el-col :span="24">
+            <el-form-item label="备注：">
+              <span class="form-value">{{ remark }}</span>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
     </el-card>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+    <el-row :gutter="10" class="mb8" style="margin-bottom: 15px;">
+      <el-col :span="24" style="text-align: right;">
         <el-button
           type="primary"
           plain
@@ -53,8 +58,6 @@
           v-hasPermi="['system:reimburse:add']"
           v-if="processStatus === 'DRAFT' || processStatus === 'REJECTED'"
         >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
         <el-button
           type="danger"
           plain
@@ -63,120 +66,77 @@
           @click="handleDelete"
           v-hasPermi="['system:reimburse:remove']"
           v-if="processStatus === 'DRAFT' || processStatus === 'REJECTED'"
+          style="margin-left: 10px;"
         >删除</el-button>
       </el-col>
-      <!-- <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['system:reimburse:export']"
-        >导出</el-button>
-      </el-col> -->
     </el-row>
 
-    <el-table
-      v-loading="loading"
-      :data="reimburseList"
-      @selection-change="handleSelectionChange"
-      border
-      fit
-      highlight-current-row
-    >
-      <el-table-column type="selection" width="55" align="center" />
-      <!-- <el-table-column label="单据编号" align="center" prop="billNo" />
-      <el-table-column label="提交人" align="center" prop="nickName" /> -->
-      <el-table-column label="开始时间" align="center" prop="startTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="结束时间" align="center" prop="endTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="票据总数" align="center" prop="ticketTotal" />
-      <!-- <el-table-column label="月度" align="center" prop="monthSelect" /> -->
-      <el-table-column label="票据总金额" align="center" prop="totalAmount">
-        <template slot-scope="scope">
-          <span>{{ scope.row.totalAmount.toFixed(2) }}</span>
-        </template>
-      </el-table-column>
-      <!-- <el-table-column label="创建时间" align="center" prop="createTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="流程状态" align="center" prop="processStatus">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.process_status" :value="scope.row.processStatus"/>
-        </template>
-      </el-table-column>
-      <el-table-column label="提交时间" align="center" prop="submitTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.submitTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
-        </template> -->
-      </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-view"
-            @click="handleView(scope.row)"
-            v-if="processStatus === 'APPROVING' || processStatus === 'APPROVED'"
-            v-hasPermi="['system:reimburse:query']"
-          >查看</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleEdit(scope.row)"
-            v-if="processStatus === 'DRAFT' || processStatus === 'REJECTED'"
-            v-hasPermi="['system:reimburse:edit']"
-          >修改</el-button>
-          <!-- <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-circle-check"
-            @click="handleSubmit(scope.row)"
-            v-hasPermi="['system:reimburse:submit']"
-            v-if="scope.row.processStatus === 'DRAFT' || scope.row.processStatus === 'REJECTED'"
-          >提交审批</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-circle-close"
-            @click="handleCancel(scope.row)"
-            v-hasPermi="['system:reimburse:cancel']"
-            v-if="scope.row.processStatus === 'SUBMITTED' || scope.row.processStatus === 'APPROVING'"
-          >撤销申请</el-button> -->
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDeleteOne(scope.row)"
-            v-hasPermi="['system:reimburse:remove']"
-            v-if="scope.row.processStatus === 'DRAFT' || scope.row.processStatus === 'CANCELED' || scope.row.processStatus === 'REJECTED'"
-          >删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <!-- 表格容器 - 新增相对定位用于印章绝对定位 -->
+    <div class="table-container" :class="{ 'approved': processStatus === 'APPROVED', 'rejected': processStatus === 'REJECTED' }">
+      <!-- 审批状态印章 -->
+      <div class="approval-seal approved-seal" v-if="processStatus === 'APPROVED'">通过</div>
+      <div class="approval-seal rejected-seal" v-if="processStatus === 'REJECTED'">拒绝</div>
 
-    <!-- <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    /> -->
-    <div slot="footer" class="dialog-footer">
+      <el-table
+        v-loading="loading"
+        :data="reimburseList"
+        @selection-change="handleSelectionChange"
+        border
+        fit
+        highlight-current-row
+      >
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column label="开始时间" align="center" prop="startTime" width="180">
+          <template slot-scope="scope">
+            <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="结束时间" align="center" prop="endTime" width="180">
+          <template slot-scope="scope">
+            <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="票据总数" align="center" prop="ticketTotal" />
+        <!-- <el-table-column label="月度" align="center" prop="monthSelect" /> -->
+        <el-table-column label="票据总金额" align="center" prop="totalAmount">
+          <template slot-scope="scope">
+            <span>{{ scope.row.totalAmount.toFixed(2) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-view"
+              @click="handleView(scope.row)"
+              v-hasPermi="['system:reimburse:query']"
+            >查看</el-button>
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-edit"
+              @click="handleEdit(scope.row)"
+              v-if="processStatus === 'DRAFT' || processStatus === 'REJECTED'"
+              v-hasPermi="['system:reimburse:edit']"
+            >修改</el-button>
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-delete"
+              @click="handleDeleteOne(scope.row)"
+              v-hasPermi="['system:reimburse:remove']"
+              v-if="scope.row.processStatus === 'DRAFT' || scope.row.processStatus === 'CANCELED' || scope.row.processStatus === 'REJECTED'"
+            >删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+
+    <div slot="footer" class="dialog-footer" style="margin-top: 15px; text-align: right;">
       <el-button type="success" @click="reviewApprove" v-if="processStatus === 'APPROVING'" v-hasPermi="['system:reimburse:review']">审核通过</el-button>
-        <el-button type="warning" @click="reviewReject" v-if="processStatus === 'APPROVING'" v-hasPermi="['system:reimburse:review']">审核拒绝</el-button>
-      <el-button @click="returnMain">返 回</el-button>
+      <el-button type="warning" @click="reviewReject" v-if="processStatus === 'APPROVING'" v-hasPermi="['system:reimburse:review']" style="margin-left: 10px;">审核拒绝</el-button>
+      <el-button @click="returnMain" style="margin-left: 10px;">返 回</el-button>
     </div>
 
     <!-- 新增/修改弹窗 -->
@@ -191,6 +151,7 @@
         ref="reimburseForm"
         :is-view="isView"
         :reimburse-id="reimburseId"
+        :user-name="userName"
       />
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm" v-if="!isView" v-hasPermi="['system:reimburse:edit']">确 定</el-button>
@@ -249,19 +210,13 @@ export default {
       viewReimburseId: null,
       docId: null,
       submitter:null,
+      userName:null,
       monthSelect:null,
       billNo:null,
       billsNumber:null,
       amount:0,
       processStatus: null,
-      // 查询参数
-      queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        billNo: null,
-        monthSelect: null,
-        processStatus: null,
-      },
+      remark: null,
     };
   },
   created() {
@@ -281,23 +236,13 @@ export default {
         this.billNo = response.docInfo.billNo
         this.billsNumber = response.docInfo.billsNumber
         this.processStatus = response.docInfo.processStatus
-        this.loading = false;
+        this.remark = response.docInfo.remark
+        this.userName = response.docInfo.userName
+        this.loading = false
       });
     },
     // 搜索按钮操作
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
-    },
-    // 重置按钮操作
-    resetQuery() {
-      this.queryParams = {
-        pageNum: 1,
-        pageSize: 10,
-        billNo: null,
-        monthSelect: null,
-        processStatus: null,
-      };
       this.getList();
     },
     // 多选框选中数据
@@ -349,12 +294,6 @@ export default {
         this.getList();
         this.$modal.msgSuccess("删除成功");
       }).catch(() => {});
-    },
-    // 导出按钮操作
-    handleExport() {
-      this.download('reimburse/export', {
-        ...this.queryParams
-      }, `reimburse_${new Date().getTime()}.xlsx`)
     },
     // 提交表单
     submitForm() {
@@ -430,5 +369,60 @@ export default {
 /* 可选：给信息卡片添加自定义样式，增强视觉效果 */
 .info-card {
   --el-card-padding: 15px;
+}
+
+/* 表单行间距优化 */
+.info-form .el-form-item {
+  margin-bottom: 10px;
+}
+
+/* 表单值样式 */
+.form-value {
+  display: inline-block;
+  min-height: 32px;
+  line-height: 32px;
+}
+
+/* 表格容器 - 相对定位 */
+.table-container {
+  position: relative;
+}
+
+/* 审批印章通用样式 */
+.approval-seal {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
+  opacity: 0.8;
+  z-index: 10;
+  /* 旋转角度增加印章效果 */
+  transform: rotate(-15deg);
+}
+
+/* 通过印章样式 - 绿色 */
+.approved-seal {
+  background-color: #67c23a;
+  border: 3px solid #52c41a;
+}
+
+/* 拒绝印章样式 - 红色 */
+.rejected-seal {
+  background-color: #f56c6c;
+  border: 3px solid #ff4d4f;
+}
+
+/* 印章文字样式优化 */
+.approval-seal span {
+  display: inline-block;
+  transform: rotate(15deg);
 }
 </style>

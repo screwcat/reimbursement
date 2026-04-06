@@ -133,7 +133,10 @@
               type="number"
               placeholder="请输入金额"
               :disabled="isView"
-              precision="2"
+              :precision="2"
+              :step="0.01" 
+              :min="0"
+              @input="handleAmountInput(scope.row)"
               @change="calculateTotalAmount"
             />
           </template>
@@ -232,7 +235,7 @@
 </template>
 
 <script>
-import { getReimburse, addReimburse, addReimComplete, updateReimburse, changeProcessState } from "@/api/reimburse";
+import { getReimburse, addReimburse, addReimComplete, updateReimburse, changeProcessState, checkTimePeriod } from "@/api/reimburse";
 import { getToken } from "@/utils/auth";
 
 export default {
@@ -246,8 +249,41 @@ export default {
       type: [Number, String, null],
       default: null,
     },
+    userName: {
+      type: String,
+      default: '',
+  },
   },
   data() {
+    const validateTimePeriod = (rule, value, callback) => {
+      // 获取开始时间和结束时间（根据实际表单字段名调整）
+      const startTime = this.form.startTime;
+      const endTime = this.form.endTime;
+      const userName = this.userName; 
+
+      // 先校验时间必填（可选）
+      if (!startTime || !endTime) {
+        return callback(new Error("请选择开始时间和结束时间"));
+      }
+
+      // 调用后台校验接口
+      checkTimePeriod({
+        userName: userName,
+        startDate: startTime,
+        endDate: endTime,
+      }).then(response => {
+        if (response) {
+          // 返回true，校验通过
+          callback();
+        } else {
+          // 返回false，提示重复
+          callback(new Error("时间范围和其他行程有重叠"));
+        }
+      }).catch(error => {
+        // 接口异常处理
+        callback(new Error("时间范围校验失败，请重试"));
+      });
+    };
     return {
       form: {
         dateRange: null, 
@@ -274,7 +310,7 @@ export default {
           required: true, 
           message: "时间范围不能为空", 
           trigger: "change" 
-        }],
+        }, { validator: validateTimePeriod, trigger: 'blur' }],
         ticketTotal: [{ 
           required: true, 
           message: "票据总数不能为空", 
@@ -310,15 +346,6 @@ export default {
     }
   },
   methods: {
-    calculateTotalAmount() {
-      let total = 0;
-      this.detailList.forEach(row => {
-        const amount = Number(row.amount) || 0;
-        total += amount;
-      });
-      this.form.totalAmount = Number(total.toFixed(2));
-    },
-
     initForm(reimburseId) {
       this.resetForm();
       if (reimburseId) {
@@ -656,6 +683,60 @@ export default {
         }
       });
     },
+    handleAmountInput(row) {
+      if (row.amount === null || row.amount === undefined) {
+        row.amount = '';
+        return;
+      }
+      // 1. 过滤非数字和小数点，保留最多一个小数点，小数点后最多两位
+      let val = row.amount.toString()
+        .replace(/[^0-9.]/g, '') // 过滤非数字和小数点
+        .replace(/^\./, '0.')    // 以小数点开头时，补0
+        .replace(/\.{2,}/g, '.') // 多个小数点保留第一个
+        .replace(/(\.\d{2}).+/, '$1'); // 小数点后最多两位
+      
+      // 2. 避免输入过程中修改v-model导致光标跳动（仅过滤，不格式化）
+      if (val !== row.amount.toString()) {
+        // 记录光标位置
+        const inputEl = document.activeElement;
+        const cursorPos = inputEl.selectionStart;
+        // 赋值（仅过滤，不toFixed）
+        row.amount = val;
+        // 恢复光标位置（解决跳动问题）
+        this.$nextTick(() => {
+          if (inputEl) {
+            inputEl.selectionStart = cursorPos;
+            inputEl.selectionEnd = cursorPos;
+          }
+        });
+      }
+      // 实时计算总金额
+      this.calculateTotalAmount();
+    },
+    handleAmountBlur(row) {
+      if (row.amount === null || row.amount === undefined || row.amount === '') {
+        row.amount = null;
+        return;
+      }
+      // 仅在输入完成后格式化，避免输入过程中修改值
+      let num = Number(row.amount);
+      if (isNaN(num)) {
+        num = 0;
+      }
+      row.amount = num.toFixed(2);
+      this.calculateTotalAmount();
+    },
+
+    // 优化原有计算总金额方法（可选，增强鲁棒性）
+    calculateTotalAmount() {
+      let total = 0;
+      this.detailList.forEach(row => {
+        const amount = Number(row.amount) || 0;
+        total += amount;
+      });
+      // 强制保留两位小数，避免浮点运算误差
+      this.form.totalAmount = Number(total.toFixed(2));
+    }
   },
 };
 </script>

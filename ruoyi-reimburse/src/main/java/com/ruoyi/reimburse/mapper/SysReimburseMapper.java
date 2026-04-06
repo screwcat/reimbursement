@@ -67,4 +67,6 @@ public interface SysReimburseMapper
     public int submitReimburse(Long reimburseId);
 
     public List<SysReimburse> getTravelStatistics(@Param("startMonth")String startMonth, @Param("endMonth")String endMonth);
+
+    public List<SysReimburse> checkTimePeriod(@Param("startDate")String startDate, @Param("endDate")String endDate, @Param("userName")String userName);
 }

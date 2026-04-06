@@ -83,3 +83,11 @@ export function getTravelStatistics(query) {
     params: query
   });
 }
+
+export function checkTimePeriod(data) {
+  return request({
+    url: '/reimburse/checkTimePeriod',
+    method: 'get',
+    params: data
+  })
+}

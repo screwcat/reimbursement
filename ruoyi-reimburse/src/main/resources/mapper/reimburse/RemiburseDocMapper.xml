@@ -12,7 +12,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="amount"    column="amount"    />
         <result property="userName"    column="user_name"    />
         <result property="monthSelect"    column="month_select"    />
-        <result property="ticketTotal"    column="ticket_total"    />
         <result property="totalAmount"    column="total_amount"    />
         <result property="remark"    column="remark"    />
         <result property="submitTime"    column="submit_time"    />
@@ -29,7 +28,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <where>
             <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
             <if test="monthSelect != null  and monthSelect != ''"> and month_select = #{monthSelect}</if>
-            <if test="ticketTotal != null "> and ticket_total = #{ticketTotal}</if>
             <if test="totalAmount != null "> and total_amount = #{totalAmount}</if>
             <if test="submitTime != null "> and submit_time = #{submitTime}</if>
             <if test="processStatus != null  and processStatus != ''"> and process_status = #{processStatus}</if>
@@ -41,16 +39,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where doc_id = #{docId}
     </select>
     <select id="selectRemiburseDoclistSummary" resultMap="RemiburseDocResult">
-        SELECT rd.doc_id,rd.bill_no,nick_name,rd.month_select,COALESCE(reim.amount,0)amount,COALESCE(bills_number,0)bills_number,rd.process_status,rd.submit_time,rd.create_time FROM remiburse_doc rd
+        SELECT rd.doc_id,rd.bill_no,rd.user_name,nick_name,rd.month_select,COALESCE(reim.amount,0)amount,COALESCE(bills_number,0)bills_number,rd.process_status,rd.submit_time,rd.create_time,rd.remark FROM remiburse_doc rd
         LEFT JOIN sys_user su ON rd.user_name = su.user_name
         LEFT JOIN (SELECT doc_id,SUM(srd.amount)amount,SUM(srd.bills_number)bills_number FROM sys_reimburse sr
         LEFT JOIN (SELECT reimburse_id,SUM(amount)amount,SUM(ticket_num)bills_number FROM sys_reimburse_detail GROUP BY reimburse_id)srd ON sr.reimburse_id = srd.reimburse_id GROUP BY doc_id) reim ON reim.doc_id = rd.doc_id
         <where>
             <if test="docId != null  and docId != ''"> and rd.doc_id = #{docId}</if>
-            <if test="userName != null  and userName != ''"> and su.nick_name like concat('%', #{userName}, '%')</if>
+            <if test="userName != null  and userName != ''"> and rd.user_name = #{userName}</if>
+            <if test="nickName != null  and nickName != ''"> and su.nick_name like concat('%', #{nickName}, '%')</if>
             <if test="monthSelect != null  and monthSelect != ''"> and rd.month_select = #{monthSelect}</if>
             <if test="processStatus != null  and processStatus != ''"> and rd.process_status = #{processStatus}</if>
         </where>
+        ORDER BY rd.doc_id DESC
     </select>
 
     <insert id="insertRemiburseDoc" parameterType="RemiburseDoc" useGeneratedKeys="true" keyProperty="docId">
@@ -59,7 +59,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             bill_no,
             <if test="userName != null and userName != ''">user_name,</if>
             <if test="monthSelect != null and monthSelect != ''">month_select,</if>
-            <if test="ticketTotal != null">ticket_total,</if>
             <if test="totalAmount != null">total_amount,</if>
             <if test="remark != null">remark,</if>
             <if test="submitTime != null">submit_time,</if>
@@ -70,7 +69,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             get_bill_no(),
             <if test="userName != null and userName != ''">#{userName},</if>
             <if test="monthSelect != null and monthSelect != ''">#{monthSelect},</if>
-            <if test="ticketTotal != null">#{ticketTotal},</if>
             <if test="totalAmount != null">#{totalAmount},</if>
             <if test="remark != null">#{remark},</if>
             <if test="submitTime != null">#{submitTime},</if>
@@ -85,7 +83,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="billNo != null">bill_no = #{billNo},</if>
             <if test="userName != null and userName != ''">user_name = #{userName},</if>
             <if test="monthSelect != null and monthSelect != ''">month_select = #{monthSelect},</if>
-            <if test="ticketTotal != null">ticket_total = #{ticketTotal},</if>
             <if test="totalAmount != null">total_amount = #{totalAmount},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="submitTime != null">submit_time = #{submitTime},</if>

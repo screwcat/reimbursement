@@ -32,10 +32,6 @@ public class RemiburseDoc extends BaseEntity
     @Excel(name = "月度选择")
     private String monthSelect;
 
-    /** 票据总数 */
-    @Excel(name = "票据总数")
-    private Long ticketTotal;
-
     /** 票据总金额 */
     @Excel(name = "票据总金额")
     private Long totalAmount;
@@ -50,7 +46,7 @@ public class RemiburseDoc extends BaseEntity
     private String processStatus;
 
     /** 提交人 */
-    @Excel(name = "提交人")
+    @Excel(name = "提交人姓名")
     private String nickName;
 
     private int billsNumber;
@@ -94,16 +90,6 @@ public class RemiburseDoc extends BaseEntity
     public String getMonthSelect()
     {
         return monthSelect;
-    }
-
-    public void setTicketTotal(Long ticketTotal)
-    {
-        this.ticketTotal = ticketTotal;
-    }
-
-    public Long getTicketTotal()
-    {
-        return ticketTotal;
     }
 
     public void setTotalAmount(Long totalAmount)
@@ -169,7 +155,6 @@ public class RemiburseDoc extends BaseEntity
             .append("billNo", getBillNo())
             .append("userName", getUserName())
             .append("monthSelect", getMonthSelect())
-            .append("ticketTotal", getTicketTotal())
             .append("totalAmount", getTotalAmount())
             .append("remark", getRemark())
             .append("submitTime", getSubmitTime())

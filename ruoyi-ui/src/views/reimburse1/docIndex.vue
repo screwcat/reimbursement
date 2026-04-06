@@ -1,9 +1,9 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="提交人" prop="userName">
+      <el-form-item label="提交人" prop="nickName">
         <el-input
-          v-model="queryParams.userName"
+          v-model="queryParams.nickName"
           placeholder="请输入提交人"
           clearable
           @keyup.enter.native="handleQuery"
@@ -29,22 +29,6 @@
           />
         </el-select>
       </el-form-item>
-      <!-- <el-form-item label="票据总金额" prop="totalAmount">
-        <el-input
-          v-model="queryParams.totalAmount"
-          placeholder="请输入票据总金额"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="提交时间" prop="submitTime">
-        <el-date-picker clearable
-          v-model="queryParams.submitTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择提交时间">
-        </el-date-picker>
-      </el-form-item> -->
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -62,17 +46,6 @@
           v-hasPermi="['system:doc:add']"
         >新增</el-button>
       </el-col>
-      <!-- <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['system:doc:edit']"
-        >修改</el-button>
-      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="danger"
@@ -99,12 +72,11 @@
 
     <el-table v-loading="loading" :data="docList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <!-- <el-table-column label="单据id" align="center" prop="docId" /> -->
-      <el-table-column label="单据编号" align="center" prop="billNo" />
-      <el-table-column label="提交人" align="center" prop="nickName" />
-      <el-table-column label="报销月度" align="center" prop="monthSelect" />
-      <el-table-column label="票据总数" align="center" prop="billsNumber" />
-      <el-table-column label="票据总金额" align="center" prop="amount">
+      <el-table-column label="单据编号" align="center" prop="billNo" width="120" />
+      <el-table-column label="提交人" align="center" prop="nickName" width="120" />
+      <el-table-column label="报销月度" align="center" prop="monthSelect" width="120" />
+      <el-table-column label="票据总数" align="center" prop="billsNumber" width="80" />
+      <el-table-column label="票据总金额" align="center" prop="amount" width="100" >
         <template slot-scope="scope">
           <span>{{ scope.row.amount.toFixed(2) }}</span>
         </template>
@@ -139,7 +111,7 @@
             type="text"
             icon="el-icon-s-finance"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['system:doc:edit']"
+            v-hasPermi="['system:doc:view']"
           >明细</el-button>
           <el-button
             size="mini"
@@ -180,9 +152,6 @@
     <!-- 添加或修改报销单据对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <!-- <el-form-item label="提交人" prop="userName">
-          <el-input v-model="form.userName" placeholder="请输入用户名" />
-        </el-form-item> -->
         <el-form-item label="月度选择" prop="monthSelect">
           <el-date-picker
             v-model="form.monthSelect"
@@ -193,23 +162,9 @@
             style="width: 100%"
           />
         </el-form-item>
-        <!-- <el-form-item label="票据总数" prop="ticketTotal">
-          <el-input v-model="form.ticketTotal" placeholder="请输入票据总数" />
-        </el-form-item>
-        <el-form-item label="票据总金额" prop="totalAmount">
-          <el-input v-model="form.totalAmount" placeholder="请输入票据总金额" />
-        </el-form-item> -->
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
         </el-form-item>
-        <!-- <el-form-item label="提交时间" prop="submitTime">
-          <el-date-picker clearable
-            v-model="form.submitTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择提交时间">
-          </el-date-picker>
-        </el-form-item> -->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -255,6 +210,7 @@ export default {
         totalAmount: null,
         submitTime: null,
         processStatus: null,
+        nickName: null,
       },
       // 表单参数
       form: {},
@@ -382,6 +338,11 @@ export default {
     },
     // 提交审批
     handleSubmit(row) {
+      console.log(row);
+      if(row.billsNumber===0){
+        this.$alert("请先填写明细在提交该单据！");
+        return;
+      }
       this.$confirm('确认提交审批吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -395,7 +356,7 @@ export default {
     },
     // 撤销申请
     handleCancel(row) {
-      this.$confirm('确认撤销申请吗？', '提示', {
+      this.$confirm('确认撤销该单据吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
