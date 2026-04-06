@@ -130,14 +130,11 @@
           <template slot-scope="scope">
             <el-input
               v-model="scope.row.amount"
-              type="number"
+              type="text"
               placeholder="请输入金额"
               :disabled="isView"
-              :precision="2"
-              :step="0.01" 
-              :min="0"
               @input="handleAmountInput(scope.row)"
-              @change="calculateTotalAmount"
+              @change="handleAmountBlur(scope.row)"
             />
           </template>
         </el-table-column>
@@ -683,60 +680,50 @@ export default {
         }
       });
     },
+    // 新增：金额输入过滤（仅允许数字+单个小数点+小数点后两位）
     handleAmountInput(row) {
       if (row.amount === null || row.amount === undefined) {
         row.amount = '';
         return;
       }
-      // 1. 过滤非数字和小数点，保留最多一个小数点，小数点后最多两位
+      // 1. 转为字符串并过滤非法字符
       let val = row.amount.toString()
         .replace(/[^0-9.]/g, '') // 过滤非数字和小数点
-        .replace(/^\./, '0.')    // 以小数点开头时，补0
+        .replace(/^\./, '0.')    // 以小数点开头 → 补0（如 .5 → 0.5）
         .replace(/\.{2,}/g, '.') // 多个小数点保留第一个
         .replace(/(\.\d{2}).+/, '$1'); // 小数点后最多两位
       
-      // 2. 避免输入过程中修改v-model导致光标跳动（仅过滤，不格式化）
+      // 2. 仅在值变化时赋值（避免死循环）
       if (val !== row.amount.toString()) {
-        // 记录光标位置
-        const inputEl = document.activeElement;
-        const cursorPos = inputEl.selectionStart;
-        // 赋值（仅过滤，不toFixed）
         row.amount = val;
-        // 恢复光标位置（解决跳动问题）
-        this.$nextTick(() => {
-          if (inputEl) {
-            inputEl.selectionStart = cursorPos;
-            inputEl.selectionEnd = cursorPos;
-          }
-        });
       }
-      // 实时计算总金额
-      this.calculateTotalAmount();
-    },
-    handleAmountBlur(row) {
-      if (row.amount === null || row.amount === undefined || row.amount === '') {
-        row.amount = null;
-        return;
-      }
-      // 仅在输入完成后格式化，避免输入过程中修改值
-      let num = Number(row.amount);
-      if (isNaN(num)) {
-        num = 0;
-      }
-      row.amount = num.toFixed(2);
+      // 3. 实时计算总金额
       this.calculateTotalAmount();
     },
 
-    // 优化原有计算总金额方法（可选，增强鲁棒性）
+    // 新增：失焦时格式化（补全两位小数，如 10 → 10.00，10.5 → 10.50）
+    handleAmountBlur(row) {
+      if (!row.amount || row.amount === '' || row.amount === '0.') {
+        row.amount = '0.00';
+        this.calculateTotalAmount();
+        return;
+      }
+      // 转为数字后格式化，避免纯字符串导致计算错误
+      const num = Number(row.amount);
+      row.amount = isNaN(num) ? '0.00' : num.toFixed(2);
+      this.calculateTotalAmount();
+    },
+
+    // 优化原有 calculateTotalAmount 方法（兼容字符串格式的金额）
     calculateTotalAmount() {
       let total = 0;
       this.detailList.forEach(row => {
-        const amount = Number(row.amount) || 0;
+        // 兼容空值/字符串格式，转为数字计算
+        const amount = row.amount ? Number(row.amount) : 0;
         total += amount;
       });
-      // 强制保留两位小数，避免浮点运算误差
       this.form.totalAmount = Number(total.toFixed(2));
-    }
+    },
   },
 };
 </script>
