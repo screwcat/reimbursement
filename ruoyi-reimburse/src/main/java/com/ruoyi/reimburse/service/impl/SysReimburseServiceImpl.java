@@ -222,8 +222,8 @@ public class SysReimburseServiceImpl implements ISysReimburseService
     }
 
     @Override
-    public boolean checkTimePeriod(String startDate, String endDate, String userName) {
-        List<SysReimburse> list = sysReimburseMapper.checkTimePeriod(startDate, endDate, userName);
+    public boolean checkTimePeriod(String startDate, String endDate, String userName,Long reimburseId) {
+        List<SysReimburse> list = sysReimburseMapper.checkTimePeriod(startDate, endDate, userName, reimburseId);
         if(list.size()>0){
             return false;
         }

@@ -266,6 +266,7 @@ export default {
       // 调用后台校验接口
       checkTimePeriod({
         userName: userName,
+        reimburseId: this.reimburseId,
         startDate: startTime,
         endDate: endTime,
       }).then(response => {

@@ -132,5 +132,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE sd.user_name = #{userName}
         AND start_time &lt;= LAST_DAY(STR_TO_DATE(#{endDate}, '%Y-%m-%d'))
         AND end_time &gt;= STR_TO_DATE(#{startDate}, '%Y-%m-%d')
+        <if test="reimburseId != null  and reimburseId != ''"> AND sr.reimburse_id &lt;&gt; #{reimburseId}</if>
     </select>
 </mapper>

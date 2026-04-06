@@ -73,5 +73,5 @@ public interface ISysReimburseService
 
     public List<TravelStatistic> getTravelStatistics(String startMonth, String endMonth);
 
-    public boolean checkTimePeriod(String startDate, String endDate, String userName);
+    public boolean checkTimePeriod(String startDate, String endDate, String userName,Long reimburseId);
 }
