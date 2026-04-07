@@ -3,6 +3,7 @@ package com.ruoyi.reimburse.domain;
 import java.math.BigDecimal;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ruoyi.common.utils.poi.ExcelDictHandler;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.common.annotation.Excel;
@@ -22,37 +23,39 @@ public class RemiburseDoc extends BaseEntity
     private Long docId;
 
     /** 单据编号 */
+    @Excel(name = "单据编号",sort = 0)
     private String billNo;
 
     /** 用户名 */
-    @Excel(name = "用户名")
     private String userName;
 
     /** 月度选择 */
-    @Excel(name = "月度选择")
+    @Excel(name = "报销月度",sort = 2)
     private String monthSelect;
 
     /** 票据总金额 */
-    @Excel(name = "票据总金额")
     private Long totalAmount;
 
     /** 提交时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Excel(name = "提交时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "提交时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss",sort = 6)
     private Date submitTime;
 
     /** 流程状态 */
-    @Excel(name = "流程状态")
+    @Excel(name = "流程状态",sort = 7,handler = ExcelDictHandler.class, args = {"process_status"})
     private String processStatus;
 
     /** 提交人 */
-    @Excel(name = "提交人姓名")
+    @Excel(name = "提交人",sort = 1)
     private String nickName;
 
+    @Excel(name = "票据总数",sort = 3)
     private int billsNumber;
 
+    @Excel(name = "票据总金额",sort = 5)
     private BigDecimal amount;
 
+    @Excel(name = "票据总数",sort = 4)
     private int daysBetween;
 
     public void setDocId(Long docId)

@@ -65,7 +65,7 @@ public class RemiburseDocController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, RemiburseDoc remiburseDoc)
     {
-        List<RemiburseDoc> list = remiburseDocService.selectRemiburseDocList(remiburseDoc);
+        List<RemiburseDoc> list = remiburseDocService.selectRemiburseDoclistSummary(remiburseDoc);
         ExcelUtil<RemiburseDoc> util = new ExcelUtil<RemiburseDoc>(RemiburseDoc.class);
         util.exportExcel(response, list, "报销单据主数据");
     }

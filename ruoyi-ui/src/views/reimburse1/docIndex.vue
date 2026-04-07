@@ -380,9 +380,9 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('remiburseDoc', {
+      this.download('remiburseDoc/export', {
         ...this.queryParams
-      }, `doc_${new Date().getTime()}.xlsx`)
+      }, `报销统计表${new Date().getTime()}.xlsx`)
     }
   }
 }

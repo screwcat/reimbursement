@@ -1,49 +1,49 @@
 <template>
   <div class="app-container">
-    <!-- 新增的卡片式信息区域 -->
+    <div class="title-container">
+      <h1 class="reimburse-title">费用报销单</h1>
+    </div>
     <el-card class="info-card" shadow="hover" style="margin: 10px 0 20px 0;">
-      <el-form class="info-form" label-width="100px">
+      <el-form class="info-form">
         <el-row :gutter="20">
-          <!-- 第一行两列 -->
           <el-col :span="12">
-            <el-form-item label="提交人：">
+            <el-form-item label="提交人：" class="uniform-line-item"> <!-- 新增 class -->
               <span class="form-value">{{ submitter }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="单据编号：">
+            <el-form-item label="单据编号：" class="uniform-line-item"> <!-- 新增 class -->
               <span class="form-value">{{ billNo }}</span>
             </el-form-item>
           </el-col>
-          <!-- 第二行两列 -->
           <el-col :span="12">
-            <el-form-item label="月度选择：">
+            <el-form-item label="月度选择：" class="uniform-line-item">
               <span class="form-value">{{ monthSelect }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="单据数量：">
+            <el-form-item label="单据数量：" class="uniform-line-item">
               <span class="form-value">{{ billsNumber }}</span>
             </el-form-item>
           </el-col>
           <!-- 第三行两列 -->
           <el-col :span="12">
-            <el-form-item label="总金额：">
+            <el-form-item label="总金额：" class="uniform-line-item">
               <span class="form-value">￥{{ amount.toFixed(2) }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="流程状态：">
+            <el-form-item label="流程状态：" class="uniform-line-item">
               <span class="form-value"><dict-tag :options="dict.type.process_status" :value="processStatus"/></span>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="天 数：">
+            <el-form-item label="天 数：" class="uniform-line-item">
               <span class="form-value">{{ daysBetween }}</span>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="备 注：">
+            <el-form-item label="备 注：" class="uniform-line-item">
               <span class="form-value">{{ remark }}</span>
             </el-form-item>
           </el-col>
@@ -74,8 +74,6 @@
         >删除</el-button>
       </el-col>
     </el-row>
-
-    <!-- 表格容器 - 新增相对定位用于印章绝对定位 -->
     <div class="table-container" :class="{ 'approved': processStatus === 'APPROVED', 'rejected': processStatus === 'REJECTED' }">
       <!-- 审批状态印章 -->
       <div class="approval-seal approved-seal" v-if="processStatus === 'APPROVED'">通过</div>
@@ -143,7 +141,6 @@
       <el-button @click="returnMain" style="margin-left: 10px;">返 回</el-button>
     </div>
 
-    <!-- 新增/修改弹窗 -->
     <el-dialog
       :title="title"
       :visible.sync="open"
@@ -163,7 +160,6 @@
       </div>
     </el-dialog>
 
-    <!-- 查看弹窗 -->
     <el-dialog
       title="报销申请详情"
       :visible.sync="viewOpen"
@@ -372,9 +368,47 @@ export default {
 </script>
 
 <style scoped>
+/* 标题容器样式 */
+.title-container {
+  text-align: center;
+  margin: 20px 0;
+}
+
+/* 费用报销单标题样式 - 双下划线 */
+.reimburse-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #1f2d3d;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 8px;
+}
+
+.reimburse-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #13c2c2; /* 蓝绿色 */
+}
+
+.reimburse-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 6px;
+  width: 100%;
+  height: 3px;
+  background-color: #13c2c2; /* 蓝绿色 */
+}
+
 /* 可选：给信息卡片添加自定义样式，增强视觉效果 */
 .info-card {
   --el-card-padding: 15px;
+  border: 2px solid #13c2c2 !important; /* 蓝绿色边框 */
+  border-radius: 8px;
 }
 
 /* 表单行间距优化 */
@@ -430,5 +464,42 @@ export default {
 .approval-seal span {
   display: inline-block;
   transform: rotate(15deg);
+}
+.form-value {
+  display: inline-block;
+  min-height: 32px;
+  line-height: 32px;
+  /* 新增：为所有表单值添加蓝绿色下划线 */
+  border-bottom: 1.5px solid #13c2c2;
+  padding: 0 0 3px 8px; /* 可选：增加一点间距，使下划线看起来更舒适 */
+}
+.info-form .uniform-line-item {
+  display: flex; /* 启用flex布局 */
+  margin-bottom: 12px; /* 调整行间距，可根据需要修改 */
+}
+
+/* 调整标签和内容的对齐与宽度 */
+.info-form .uniform-line-item ::v-deep .el-form-item__label {
+  text-align: left;
+  flex: 0 0 80px; /* 标签固定宽度，与上方的 label-width="100px" 对应 */
+  font-weight: bold; /* 可选：加粗标签 */
+  color: #606266; /* 可选：设置标签颜色 */
+  padding-right: 10px; /* 标签和值之间的间距 */
+}
+.info-form .uniform-line-item ::v-deep .el-form-item__content {
+  flex: 1; /* 内容区域占据剩余所有空间 */
+  display: flex;
+  align-items: center; /* 垂直居中对齐 */
+  min-height: 32px; /* 最小高度，确保有触摸区域 */
+}
+
+/* 表单值样式 - 修改下划线为宽度100% */
+.info-form .uniform-line-item .form-value {
+  display: block; /* 改为块级元素 */
+  width: 100%; /* 宽度占满父容器（.el-form-item__content） */
+  line-height: 1.5;
+  border-bottom: 1.5px solid #13c2c2; /* 蓝绿色下划线 */
+  padding-bottom: 3px;
+  box-sizing: border-box; /* 确保padding不影响总宽度 */
 }
 </style>
