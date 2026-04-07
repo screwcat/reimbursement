@@ -76,6 +76,7 @@
       <el-table-column label="提交人" align="center" prop="nickName" width="120" />
       <el-table-column label="报销月度" align="center" prop="monthSelect" width="120" />
       <el-table-column label="票据总数" align="center" prop="billsNumber" width="80" />
+      <el-table-column label="总天数" align="center" prop="daysBetween" width="80" />
       <el-table-column label="票据总金额" align="center" prop="amount" width="100" >
         <template slot-scope="scope">
           <span>{{ scope.row.amount.toFixed(2) }}</span>

@@ -52,6 +52,8 @@ public class SysReimburse extends BaseEntity
 
     private Long ticketTotal;
 
+    private int daysBetween;
+
     public void setReimburseId(Long reimburseId)
     {
         this.reimburseId = reimburseId;
@@ -145,6 +147,13 @@ public class SysReimburse extends BaseEntity
         this.ticketTotal = ticketTotal;
     }
 
+    public int getDaysBetween() {
+        return daysBetween;
+    }
+
+    public void setDaysBetween(int daysBetween) {
+        this.daysBetween = daysBetween;
+    }
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)

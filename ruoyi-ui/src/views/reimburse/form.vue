@@ -27,6 +27,10 @@
               :disabled="isView"
               value-format="yyyy-MM-dd"
             />
+            <!-- 新增：显示计算的天数 -->
+            <div v-if="form.dateRange && form.dateRange.length === 2" style="margin-top: 8px; color: #606266; font-size: 12px;">
+              共计：{{ daysCount }} 天
+            </div>
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -321,6 +325,24 @@ export default {
         }],
       },
     };
+  },
+  // 新增：计算天数的计算属性
+  computed: {
+    daysCount() {
+      if (!this.form.dateRange || this.form.dateRange.length !== 2) {
+        return 0;
+      }
+      // 转换为Date对象
+      const startDate = new Date(this.form.dateRange[0]);
+      const endDate = new Date(this.form.dateRange[1]);
+      
+      // 计算时间差（毫秒）
+      const timeDiff = endDate.getTime() - startDate.getTime();
+      // 转换为天数（向上取整，包含开始和结束日）
+      const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) + 1;
+      
+      return days;
+    }
   },
   watch: {
     detailList: {

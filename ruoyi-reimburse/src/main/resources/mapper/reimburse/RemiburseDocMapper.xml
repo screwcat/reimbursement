@@ -17,6 +17,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="submitTime"    column="submit_time"    />
         <result property="processStatus"    column="process_status"    />
         <result property="createTime"    column="create_time"    />
+        <result property="daysBetween"    column="days_between"    />
     </resultMap>
 
     <sql id="selectRemiburseDocVo">
@@ -39,9 +40,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where doc_id = #{docId}
     </select>
     <select id="selectRemiburseDoclistSummary" resultMap="RemiburseDocResult">
-        SELECT rd.doc_id,rd.bill_no,rd.user_name,nick_name,rd.month_select,COALESCE(reim.amount,0)amount,COALESCE(bills_number,0)bills_number,rd.process_status,rd.submit_time,rd.create_time,rd.remark FROM remiburse_doc rd
+        SELECT rd.doc_id,rd.bill_no,rd.user_name,nick_name,rd.month_select,COALESCE(reim.amount,0)amount,COALESCE(bills_number,0)bills_number,rd.process_status,rd.submit_time,rd.create_time,rd.remark,reim.days_between FROM remiburse_doc rd
         LEFT JOIN sys_user su ON rd.user_name = su.user_name
-        LEFT JOIN (SELECT doc_id,SUM(srd.amount)amount,SUM(srd.bills_number)bills_number FROM sys_reimburse sr
+        LEFT JOIN (SELECT doc_id,SUM(srd.amount)amount,SUM(srd.bills_number)bills_number,SUM(DATEDIFF(end_time, start_time)+1) days_between FROM sys_reimburse sr
         LEFT JOIN (SELECT reimburse_id,SUM(amount)amount,SUM(ticket_num)bills_number FROM sys_reimburse_detail GROUP BY reimburse_id)srd ON sr.reimburse_id = srd.reimburse_id GROUP BY doc_id) reim ON reim.doc_id = rd.doc_id
         <where>
             <if test="docId != null  and docId != ''"> and rd.doc_id = #{docId}</if>

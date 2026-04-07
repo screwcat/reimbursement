@@ -37,9 +37,13 @@
               <span class="form-value"><dict-tag :options="dict.type.process_status" :value="processStatus"/></span>
             </el-form-item>
           </el-col>
-          <!-- 备注独占一行（两列） -->
-          <el-col :span="24">
-            <el-form-item label="备注：">
+          <el-col :span="12">
+            <el-form-item label="天 数：">
+              <span class="form-value">{{ daysBetween }}</span>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="备 注：">
               <span class="form-value">{{ remark }}</span>
             </el-form-item>
           </el-col>
@@ -96,8 +100,8 @@
             <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>
           </template>
         </el-table-column>
+        <el-table-column label="天数" align="center" prop="daysBetween" />
         <el-table-column label="票据总数" align="center" prop="ticketTotal" />
-        <!-- <el-table-column label="月度" align="center" prop="monthSelect" /> -->
         <el-table-column label="票据总金额" align="center" prop="totalAmount">
           <template slot-scope="scope">
             <span>{{ scope.row.totalAmount.toFixed(2) }}</span>
@@ -215,6 +219,7 @@ export default {
       billNo:null,
       billsNumber:null,
       amount:0,
+      daysBetween:0,
       processStatus: null,
       remark: null,
     };
@@ -235,6 +240,7 @@ export default {
         this.submitter = response.docInfo.nickName
         this.billNo = response.docInfo.billNo
         this.billsNumber = response.docInfo.billsNumber
+        this.daysBetween = response.docInfo.daysBetween
         this.processStatus = response.docInfo.processStatus
         this.remark = response.docInfo.remark
         this.userName = response.docInfo.userName

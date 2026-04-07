@@ -52,6 +52,9 @@ public class RemiburseDoc extends BaseEntity
     private int billsNumber;
 
     private BigDecimal amount;
+
+    private int daysBetween;
+
     public void setDocId(Long docId)
     {
         this.docId = docId;
@@ -148,6 +151,13 @@ public class RemiburseDoc extends BaseEntity
         this.amount = amount;
     }
 
+    public int getDaysBetween() {
+        return daysBetween;
+    }
+
+    public void setDaysBetween(int daysBetween) {
+        this.daysBetween = daysBetween;
+    }
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)

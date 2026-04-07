@@ -18,10 +18,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateTime"    column="update_time"    />
         <result property="delFlag"    column="del_flag"    />
         <result property="nickName"    column="nick_name"    />
+        <result property="daysBetween"    column="days_between"    />
     </resultMap>
 
     <sql id="selectSysReimburseVo">
-        SELECT sr.reimburse_id, doc_id, start_time, end_time,  COALESCE(amount,0)total_amount,COALESCE(ticketTotal,0)ticketTotal, sr.remark, sr.create_by, sr.create_time, sr.update_by, sr.update_time, sr.del_flag FROM sys_reimburse sr LEFT JOIN (SELECT reimburse_id,SUM(amount)amount,SUM(ticket_num)ticketTotal FROM sys_reimburse_detail GROUP BY reimburse_id)srd ON sr.reimburse_id = srd.reimburse_id
+        SELECT sr.reimburse_id, doc_id, start_time, end_time,  COALESCE(amount,0)total_amount,COALESCE(ticketTotal,0)ticketTotal, sr.remark, sr.create_by, sr.create_time, sr.update_by, sr.update_time, sr.del_flag,DATEDIFF(end_time, start_time)+1 days_between FROM sys_reimburse sr LEFT JOIN (SELECT reimburse_id,SUM(amount)amount,SUM(ticket_num)ticketTotal FROM sys_reimburse_detail GROUP BY reimburse_id)srd ON sr.reimburse_id = srd.reimburse_id
     </sql>
 
     <select id="selectSysReimburseList" parameterType="SysReimburse" resultMap="SysReimburseResult">
