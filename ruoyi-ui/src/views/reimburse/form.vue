@@ -81,12 +81,13 @@
               v-model="scope.row.ticketType"
               placeholder="请选择票据类型"
               style="width: 100%"
-              :disabled="isView"
-            >
-              <el-option label="交通" value="交通" />
-              <el-option label="办公用品" value="办公用品" />
-              <el-option label="餐饮" value="餐饮" />
-              <el-option label="其他" value="其他" />
+              :disabled="isView">
+              <el-option
+                v-for="dict in dict.type.invoice_type"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
             </el-select>
           </template>
         </el-table-column>
@@ -241,6 +242,7 @@ import { getToken } from "@/utils/auth";
 
 export default {
   name: "ReimburseForm",
+  dicts: ['invoice_type'],
   props: {
     isView: {
       type: Boolean,
