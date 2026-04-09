@@ -1,6 +1,6 @@
 package com.ruoyi.reimburse.mapper;
 
-import com.ruoyi.reimburse.domain.RemiburseDoc;
+import com.ruoyi.reimburse.domain.ReimburseDoc;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
  * @author ruoyi
  * @date 2026-04-03
  */
-public interface RemiburseDocMapper
+public interface ReimburseDocMapper
 {
     /**
      * 查询报销单据主
@@ -19,33 +19,33 @@ public interface RemiburseDocMapper
      * @param docId 报销单据主主键
      * @return 报销单据主
      */
-    public RemiburseDoc selectRemiburseDocByDocId(Long docId);
+    public ReimburseDoc selectReimburseDocByDocId(Long docId);
 
     /**
      * 查询报销单据主列表
      *
-     * @param remiburseDoc 报销单据主
+     * @param ReimburseDoc 报销单据主
      * @return 报销单据主集合
      */
-    public List<RemiburseDoc> selectRemiburseDocList(RemiburseDoc remiburseDoc);
+    public List<ReimburseDoc> selectReimburseDocList(ReimburseDoc ReimburseDoc);
 
-    public List<RemiburseDoc> selectRemiburseDoclistSummary(RemiburseDoc remiburseDoc);
+    public List<ReimburseDoc> selectReimburseDoclistSummary(ReimburseDoc ReimburseDoc);
 
     /**
      * 新增报销单据主
      *
-     * @param remiburseDoc 报销单据主
+     * @param ReimburseDoc 报销单据主
      * @return 结果
      */
-    public int insertRemiburseDoc(RemiburseDoc remiburseDoc);
+    public int insertReimburseDoc(ReimburseDoc ReimburseDoc);
 
     /**
      * 修改报销单据主
      *
-     * @param remiburseDoc 报销单据主
+     * @param ReimburseDoc 报销单据主
      * @return 结果
      */
-    public int updateRemiburseDoc(RemiburseDoc remiburseDoc);
+    public int updateReimburseDoc(ReimburseDoc ReimburseDoc);
 
     /**
      * 删除报销单据主
@@ -53,7 +53,7 @@ public interface RemiburseDocMapper
      * @param docId 报销单据主主键
      * @return 结果
      */
-    public int deleteRemiburseDocByDocId(Long docId);
+    public int deleteReimburseDocByDocId(Long docId);
 
     /**
      * 批量删除报销单据主
@@ -61,7 +61,7 @@ public interface RemiburseDocMapper
      * @param docIds 需要删除的数据主键集合
      * @return 结果
      */
-    public int deleteRemiburseDocByDocIds(Long[] docIds);
+    public int deleteReimburseDocByDocIds(Long[] docIds);
 
     public int submitReimburse(Long docId);
     public int changeProcessState(@Param("docId")Long docId, @Param("processStatus")String processStatus);

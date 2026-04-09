@@ -10,12 +10,12 @@ import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
- * 报销单据主对象 remiburse_doc
+ * 报销单据主对象 reimburse_doc
  *
  * @author ruoyi
  * @date 2026-04-03
  */
-public class RemiburseDoc extends BaseEntity
+public class ReimburseDoc extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 

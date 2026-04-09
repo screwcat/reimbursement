@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ruoyi.reimburse.domain.ReimburseDoc;
 import com.ruoyi.reimburse.domain.ReimburseRequest;
-import com.ruoyi.reimburse.domain.RemiburseDoc;
 import com.ruoyi.reimburse.domain.SysReimburse;
 import com.ruoyi.reimburse.domain.TravelStatistic;
-import com.ruoyi.reimburse.service.IRemiburseDocService;
+import com.ruoyi.reimburse.service.IReimburseDocService;
 import com.ruoyi.reimburse.service.ISysReimburseService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class SysReimburseController extends BaseController
     private ISysReimburseService sysReimburseService;
 
     @Autowired
-    private IRemiburseDocService remiburseDocService;
+    private IReimburseDocService reimburseDocService;
 
     /**
      * 查询报销申请单主列表
@@ -57,7 +57,7 @@ public class SysReimburseController extends BaseController
         sysReimburse.setDocId(docId);
         List<SysReimburse> list = sysReimburseService.selectSysReimburseList(sysReimburse);
         AjaxResult result = success(list);
-        RemiburseDoc docInfo = remiburseDocService.selectRemiburseSummaryByDocId(docId);
+        ReimburseDoc docInfo = reimburseDocService.selectReimburseSummaryByDocId(docId);
         result.put("docInfo", docInfo);
         return result;
     }

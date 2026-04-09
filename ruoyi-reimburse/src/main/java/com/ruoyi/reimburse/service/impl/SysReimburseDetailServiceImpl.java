@@ -2,6 +2,7 @@ package com.ruoyi.reimburse.service.impl;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.reimburse.domain.SysReimburseDetail;
 import com.ruoyi.reimburse.mapper.SysReimburseDetailMapper;
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Service;
  * @date 2026-03-11
  */
 @Service
-public class SysReimburseDetailServiceImpl implements ISysReimburseDetailService
+public class SysReimburseDetailServiceImpl extends ServiceImpl<SysReimburseDetailMapper, SysReimburseDetail> implements ISysReimburseDetailService
 {
     @Autowired
     private SysReimburseDetailMapper sysReimburseDetailMapper;

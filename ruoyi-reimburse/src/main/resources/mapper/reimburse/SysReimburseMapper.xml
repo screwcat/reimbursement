@@ -119,7 +119,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         END AS end_time,
         COALESCE(srd.amount,0) total_amount
         FROM sys_reimburse sr
-        LEFT JOIN remiburse_doc rd ON rd.doc_id = sr.doc_id
+        LEFT JOIN reimburse_doc rd ON rd.doc_id = sr.doc_id
         LEFT JOIN (SELECT reimburse_id,SUM(amount)amount,COUNT(reimburse_id)bills_number FROM sys_reimburse_detail GROUP BY reimburse_id)srd ON sr.reimburse_id = srd.reimburse_id
         LEFT JOIN sys_user su ON rd.user_name = su.user_name
         WHERE
@@ -129,7 +129,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="checkTimePeriod" resultType="com.ruoyi.reimburse.domain.SysReimburse">
         SELECT start_time,end_time
         FROM sys_reimburse sr
-        LEFT JOIN remiburse_doc sd ON sr.doc_id = sd.doc_id
+        LEFT JOIN reimburse_doc sd ON sr.doc_id = sd.doc_id
         WHERE sd.user_name = #{userName}
         AND start_time &lt;= STR_TO_DATE(#{endDate}, '%Y-%m-%d')
         AND end_time &gt;= STR_TO_DATE(#{startDate}, '%Y-%m-%d')

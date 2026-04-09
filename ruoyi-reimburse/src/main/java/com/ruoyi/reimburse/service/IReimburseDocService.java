@@ -2,7 +2,7 @@ package com.ruoyi.reimburse.service;
 
 import java.util.List;
 
-import com.ruoyi.reimburse.domain.RemiburseDoc;
+import com.ruoyi.reimburse.domain.ReimburseDoc;
 
 /**
  * 报销单据主Service接口
@@ -10,7 +10,7 @@ import com.ruoyi.reimburse.domain.RemiburseDoc;
  * @author ruoyi
  * @date 2026-04-03
  */
-public interface IRemiburseDocService
+public interface IReimburseDocService
 {
     /**
      * 查询报销单据主
@@ -18,36 +18,36 @@ public interface IRemiburseDocService
      * @param docId 报销单据主主键
      * @return 报销单据主
      */
-    public RemiburseDoc selectRemiburseDocByDocId(Long docId);
+    public ReimburseDoc selectReimburseDocByDocId(Long docId);
 
-    public RemiburseDoc selectRemiburseSummaryByDocId(Long docId);
+    public ReimburseDoc selectReimburseSummaryByDocId(Long docId);
 
     /**
      * 查询报销单据主列表
      *
-     * @param remiburseDoc 报销单据主
+     * @param ReimburseDoc 报销单据主
      * @return 报销单据主集合
      */
-    public List<RemiburseDoc> selectRemiburseDocList(RemiburseDoc remiburseDoc);
+    public List<ReimburseDoc> selectReimburseDocList(ReimburseDoc ReimburseDoc);
 
-    public List<RemiburseDoc> selectRemiburseDoclistSummary(RemiburseDoc remiburseDoc);
+    public List<ReimburseDoc> selectReimburseDoclistSummary(ReimburseDoc ReimburseDoc);
 
 
     /**
      * 新增报销单据主
      *
-     * @param remiburseDoc 报销单据主
+     * @param ReimburseDoc 报销单据主
      * @return 结果
      */
-    public int insertRemiburseDoc(RemiburseDoc remiburseDoc);
+    public int insertReimburseDoc(ReimburseDoc ReimburseDoc);
 
     /**
      * 修改报销单据主
      *
-     * @param remiburseDoc 报销单据主
+     * @param ReimburseDoc 报销单据主
      * @return 结果
      */
-    public int updateRemiburseDoc(RemiburseDoc remiburseDoc);
+    public int updateReimburseDoc(ReimburseDoc ReimburseDoc);
 
     /**
      * 批量删除报销单据主
@@ -55,7 +55,7 @@ public interface IRemiburseDocService
      * @param docIds 需要删除的报销单据主主键集合
      * @return 结果
      */
-    public int deleteRemiburseDocByDocIds(Long[] docIds);
+    public int deleteReimburseDocByDocIds(Long[] docIds);
 
     /**
      * 删除报销单据主信息
@@ -63,7 +63,7 @@ public interface IRemiburseDocService
      * @param docId 报销单据主主键
      * @return 结果
      */
-    public int deleteRemiburseDocByDocId(Long docId);
+    public int deleteReimburseDocByDocId(Long docId);
 
     public int submitReimburse(Long docId);
 

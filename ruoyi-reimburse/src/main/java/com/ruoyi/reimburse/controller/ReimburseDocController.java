@@ -5,8 +5,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.reimburse.domain.RemiburseDoc;
-import com.ruoyi.reimburse.service.IRemiburseDocService;
+import com.ruoyi.reimburse.domain.ReimburseDoc;
+import com.ruoyi.reimburse.service.IReimburseDocService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,30 +30,30 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * @date 2026-04-03
  */
 @RestController
-@RequestMapping("/remiburseDoc")
-public class RemiburseDocController extends BaseController
+@RequestMapping("/reimburseDoc")
+public class ReimburseDocController extends BaseController
 {
     @Autowired
-    private IRemiburseDocService remiburseDocService;
+    private IReimburseDocService ReimburseDocService;
 
     /**
      * 查询报销单据主列表
      */
     @PreAuthorize("@ss.hasPermi('system:doc:list')")
     @GetMapping("/list")
-    public TableDataInfo list(RemiburseDoc remiburseDoc)
+    public TableDataInfo list(ReimburseDoc ReimburseDoc)
     {
         startPage();
-        List<RemiburseDoc> list = remiburseDocService.selectRemiburseDocList(remiburseDoc);
+        List<ReimburseDoc> list = ReimburseDocService.selectReimburseDocList(ReimburseDoc);
         return getDataTable(list);
     }
 
     @PreAuthorize("@ss.hasPermi('system:doc:list')")
     @GetMapping("/listSummary")
-    public TableDataInfo listSummary(RemiburseDoc remiburseDoc)
+    public TableDataInfo listSummary(ReimburseDoc ReimburseDoc)
     {
         startPage();
-        List<RemiburseDoc> list = remiburseDocService.selectRemiburseDoclistSummary(remiburseDoc);
+        List<ReimburseDoc> list = ReimburseDocService.selectReimburseDoclistSummary(ReimburseDoc);
         return getDataTable(list);
     }
 
@@ -63,10 +63,10 @@ public class RemiburseDocController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:doc:export')")
     @Log(title = "报销单据主", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response, RemiburseDoc remiburseDoc)
+    public void export(HttpServletResponse response, ReimburseDoc ReimburseDoc)
     {
-        List<RemiburseDoc> list = remiburseDocService.selectRemiburseDoclistSummary(remiburseDoc);
-        ExcelUtil<RemiburseDoc> util = new ExcelUtil<RemiburseDoc>(RemiburseDoc.class);
+        List<ReimburseDoc> list = ReimburseDocService.selectReimburseDoclistSummary(ReimburseDoc);
+        ExcelUtil<ReimburseDoc> util = new ExcelUtil<ReimburseDoc>(ReimburseDoc.class);
         util.exportExcel(response, list, "报销单据主数据");
     }
 
@@ -77,7 +77,7 @@ public class RemiburseDocController extends BaseController
     @GetMapping(value = "/{docId}")
     public AjaxResult getInfo(@PathVariable("docId") Long docId)
     {
-        return success(remiburseDocService.selectRemiburseDocByDocId(docId));
+        return success(ReimburseDocService.selectReimburseDocByDocId(docId));
     }
 
     /**
@@ -86,9 +86,9 @@ public class RemiburseDocController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:doc:add')")
     @Log(title = "报销单据主", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody RemiburseDoc remiburseDoc)
+    public AjaxResult add(@RequestBody ReimburseDoc ReimburseDoc)
     {
-        return toAjax(remiburseDocService.insertRemiburseDoc(remiburseDoc));
+        return toAjax(ReimburseDocService.insertReimburseDoc(ReimburseDoc));
     }
 
     /**
@@ -97,9 +97,9 @@ public class RemiburseDocController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:doc:edit')")
     @Log(title = "报销单据主", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody RemiburseDoc remiburseDoc)
+    public AjaxResult edit(@RequestBody ReimburseDoc ReimburseDoc)
     {
-        return toAjax(remiburseDocService.updateRemiburseDoc(remiburseDoc));
+        return toAjax(ReimburseDocService.updateReimburseDoc(ReimburseDoc));
     }
 
     /**
@@ -110,27 +110,27 @@ public class RemiburseDocController extends BaseController
 	@DeleteMapping("/{docIds}")
     public AjaxResult remove(@PathVariable Long[] docIds)
     {
-        return toAjax(remiburseDocService.deleteRemiburseDocByDocIds(docIds));
+        return toAjax(ReimburseDocService.deleteReimburseDocByDocIds(docIds));
     }
 
     @Log(title = "提交审核", businessType = BusinessType.UPDATE)
     @PostMapping("/submit/{docId}")
     public AjaxResult submit(@PathVariable Long docId)
     {
-        return toAjax(remiburseDocService.submitReimburse(docId));
+        return toAjax(ReimburseDocService.submitReimburse(docId));
     }
 
     @Log(title = "撤销申请", businessType = BusinessType.UPDATE)
     @PostMapping("/cancel/{docId}")
     public AjaxResult cancel(@PathVariable Long docId)
     {
-        return toAjax(remiburseDocService.changeProcessState(docId,"DRAFT"));
+        return toAjax(ReimburseDocService.changeProcessState(docId,"DRAFT"));
     }
 
     @Log(title = "更改审核状态", businessType = BusinessType.INSERT)
     @PostMapping("/changeProcessState")
     public AjaxResult changeProcessState(@RequestBody Map<String, Object> sysReimburse)
     {
-        return toAjax(remiburseDocService.changeProcessState(Long.valueOf(sysReimburse.get("docId").toString()),sysReimburse.get("processState").toString()));
+        return toAjax(ReimburseDocService.changeProcessState(Long.valueOf(sysReimburse.get("docId").toString()),sysReimburse.get("processState").toString()));
     }
 }

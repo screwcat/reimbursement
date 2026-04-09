@@ -141,7 +141,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -380,7 +380,7 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('remiburseDoc/export', {
+      this.download('reimburseDoc/export', {
         ...this.queryParams
       }, `报销统计表${new Date().getTime()}.xlsx`)
     }

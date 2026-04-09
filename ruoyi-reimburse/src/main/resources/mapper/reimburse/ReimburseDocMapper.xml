@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ruoyi.reimburse.mapper.RemiburseDocMapper">
+<mapper namespace="com.ruoyi.reimburse.mapper.ReimburseDocMapper">
 
-    <resultMap type="RemiburseDoc" id="RemiburseDocResult">
+    <resultMap type="ReimburseDoc" id="ReimburseDocResult">
         <result property="docId"    column="doc_id"    />
         <result property="billNo"    column="bill_no"    />
         <result property="nickName"    column="nick_name"    />
@@ -20,12 +20,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="daysBetween"    column="days_between"    />
     </resultMap>
 
-    <sql id="selectRemiburseDocVo">
-        SELECT doc_id, bill_no, user_name, month_select, remark, submit_time, process_status, create_time FROM remiburse_doc
+    <sql id="selectReimburseDocVo">
+        SELECT doc_id, bill_no, user_name, month_select, remark, submit_time, process_status, create_time FROM Reimburse_doc
     </sql>
 
-    <select id="selectRemiburseDocList" parameterType="RemiburseDoc" resultMap="RemiburseDocResult">
-        <include refid="selectRemiburseDocVo"/>
+    <select id="selectReimburseDocList" parameterType="ReimburseDoc" resultMap="ReimburseDocResult">
+        <include refid="selectReimburseDocVo"/>
         <where>
             <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
             <if test="monthSelect != null  and monthSelect != ''"> and month_select = #{monthSelect}</if>
@@ -35,12 +35,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </where>
     </select>
 
-    <select id="selectRemiburseDocByDocId" parameterType="Long" resultMap="RemiburseDocResult">
-        <include refid="selectRemiburseDocVo"/>
+    <select id="selectReimburseDocByDocId" parameterType="Long" resultMap="ReimburseDocResult">
+        <include refid="selectReimburseDocVo"/>
         where doc_id = #{docId}
     </select>
-    <select id="selectRemiburseDoclistSummary" resultMap="RemiburseDocResult">
-        SELECT rd.doc_id,rd.bill_no,rd.user_name,nick_name,rd.month_select,COALESCE(reim.amount,0)amount,COALESCE(bills_number,0)bills_number,rd.process_status,rd.submit_time,rd.create_time,rd.remark,reim.days_between FROM remiburse_doc rd
+    <select id="selectReimburseDoclistSummary" resultMap="ReimburseDocResult">
+        SELECT rd.doc_id,rd.bill_no,rd.user_name,nick_name,rd.month_select,COALESCE(reim.amount,0)amount,COALESCE(bills_number,0)bills_number,rd.process_status,rd.submit_time,rd.create_time,rd.remark,reim.days_between FROM Reimburse_doc rd
         LEFT JOIN sys_user su ON rd.user_name = su.user_name
         LEFT JOIN (SELECT doc_id,SUM(srd.amount)amount,SUM(srd.bills_number)bills_number,SUM(DATEDIFF(end_time, start_time)+1) days_between FROM sys_reimburse sr
         LEFT JOIN (SELECT reimburse_id,SUM(amount)amount,SUM(ticket_num)bills_number FROM sys_reimburse_detail GROUP BY reimburse_id)srd ON sr.reimburse_id = srd.reimburse_id GROUP BY doc_id) reim ON reim.doc_id = rd.doc_id
@@ -54,8 +54,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER BY rd.doc_id DESC
     </select>
 
-    <insert id="insertRemiburseDoc" parameterType="RemiburseDoc" useGeneratedKeys="true" keyProperty="docId">
-        insert into remiburse_doc
+    <insert id="insertReimburseDoc" parameterType="ReimburseDoc" useGeneratedKeys="true" keyProperty="docId">
+        insert into Reimburse_doc
         <trim prefix="(" suffix=")" suffixOverrides=",">
             bill_no,
             <if test="userName != null and userName != ''">user_name,</if>
@@ -78,8 +78,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
-    <update id="updateRemiburseDoc" parameterType="RemiburseDoc">
-        update remiburse_doc
+    <update id="updateReimburseDoc" parameterType="ReimburseDoc">
+        update Reimburse_doc
         <trim prefix="SET" suffixOverrides=",">
             <if test="billNo != null">bill_no = #{billNo},</if>
             <if test="userName != null and userName != ''">user_name = #{userName},</if>
@@ -93,18 +93,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where doc_id = #{docId}
     </update>
     <update id="changeProcessState">
-        UPDATE remiburse_doc SET process_status = #{processStatus} where doc_id = #{docId}
+        UPDATE Reimburse_doc SET process_status = #{processStatus} where doc_id = #{docId}
     </update>
     <update id="submitReimburse">
-        UPDATE remiburse_doc SET process_status = 'APPROVING',submit_time = NOW() WHERE doc_id = #{docId}
+        UPDATE Reimburse_doc SET process_status = 'APPROVING',submit_time = NOW() WHERE doc_id = #{docId}
     </update>
 
-    <delete id="deleteRemiburseDocByDocId" parameterType="Long">
-        delete from remiburse_doc where doc_id = #{docId}
+    <delete id="deleteReimburseDocByDocId" parameterType="Long">
+        delete from Reimburse_doc where doc_id = #{docId}
     </delete>
 
-    <delete id="deleteRemiburseDocByDocIds" parameterType="String">
-        delete from remiburse_doc where doc_id in
+    <delete id="deleteReimburseDocByDocIds" parameterType="String">
+        delete from Reimburse_doc where doc_id in
         <foreach item="docId" collection="array" open="(" separator="," close=")">
             #{docId}
         </foreach>
