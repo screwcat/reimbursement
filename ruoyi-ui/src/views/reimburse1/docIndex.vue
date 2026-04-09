@@ -92,7 +92,7 @@
           <span>{{ parseTime(scope.row.submitTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="流程状态" align="center" prop="processStatus">
+      <el-table-column label="流程状态" align="center" prop="processStatus" width="100">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.process_status" :value="scope.row.processStatus"/>
         </template>
