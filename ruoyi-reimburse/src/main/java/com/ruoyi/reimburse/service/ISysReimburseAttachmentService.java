@@ -1,5 +1,6 @@
 package com.ruoyi.reimburse.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.ruoyi.reimburse.domain.SysReimburseAttachment;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
  * @author ruoyi
  * @date 2026-03-11
  */
-public interface ISysReimburseAttachmentService
+public interface ISysReimburseAttachmentService extends IService<SysReimburseAttachment>
 {
     /**
      * 查询报销票据影像附件

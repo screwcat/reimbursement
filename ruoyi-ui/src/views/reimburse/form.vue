@@ -694,7 +694,7 @@ export default {
             };
         try {
           changeProcessState(params).then(() => {
-                this.$modal.msgSuccess("审核拒绝!");
+                this.$modal.msgWarning("审核拒绝!");
                 resolve();
               }).catch(error => {
                 reject(error);

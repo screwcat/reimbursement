@@ -149,12 +149,13 @@ public class SysReimburseServiceImpl implements ISysReimburseService
         SysReimburse reimburse = reimburseRequest.getReimburse();
         reimburseRequest.getDetailList().forEach(detail -> {
             detail.setReimburseId(reimburseId);
-            sysReimburseDetailService.insertSysReimburseDetail(detail);
-//            sysReimburseDetailService.save(detail);
+//            sysReimburseDetailService.insertSysReimburseDetail(detail);
+            sysReimburseDetailService.save(detail);
         });
         reimburseRequest.getAttachmentList().forEach(attachment -> {
             attachment.setReimburseId(reimburseId);
-            sysReimburseAttachmentService.insertSysReimburseAttachment(attachment);
+//            sysReimburseAttachmentService.insertSysReimburseAttachment(attachment);
+            sysReimburseAttachmentService.save(attachment);
         });
      }
 
