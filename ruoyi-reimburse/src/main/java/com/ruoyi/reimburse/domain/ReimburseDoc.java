@@ -55,7 +55,7 @@ public class ReimburseDoc extends BaseEntity
     @Excel(name = "票据总金额",sort = 5)
     private BigDecimal amount;
 
-    @Excel(name = "票据总数",sort = 4)
+    @Excel(name = "总天数",sort = 4)
     private int daysBetween;
 
     public void setDocId(Long docId)
