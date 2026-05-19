@@ -66,3 +66,11 @@ export function cancelReimburse(docId) {
     method: 'post'
   })
 }
+
+// 已支付单据
+export function paidReimburse(docId) {
+  return request({
+    url: '/reimburseDoc/paidReimburse/' + docId,
+    method: 'post'
+  })
+}

@@ -28,7 +28,7 @@ export default {
       chartInstance: null,
       // 接口返回数据
       retData: [],
-      // 月份范围选择器绑定 - 默认当前月
+      // 月份范围选择器绑定 - 默认最近3个月
       dateRange: this.getDefaultMonthRange(),
       // 扩展配色映射，增加多员工适配
       colorMap: {
@@ -53,15 +53,28 @@ export default {
     }
   },
   methods: {
-    // 获取默认月份范围（当前月）
+    // 获取默认月份范围（最近3个月：当前月往前推2个月 至 当前月）
     getDefaultMonthRange() {
       const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth() + 1;
-      const monthStr = month < 10 ? `0${month}` : month;
-      const currentMonth = `${year}-${monthStr}`;
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+
+      // 计算开始月份（当前月 - 2）
+      let startMonth = currentMonth - 2;
+      let startYear = currentYear;
+      // 处理跨年场景（如当前是1月，往前推2个月是上一年11月）
+      if (startMonth <= 0) {
+        startMonth += 12;
+        startYear -= 1;
+      }
+
+      // 格式化月份为两位数
+      const formatMonth = (month) => month < 10 ? `0${month}` : month;
+      const startMonthStr = `${startYear}-${formatMonth(startMonth)}`;
+      const currentMonthStr = `${currentYear}-${formatMonth(currentMonth)}`;
+
       // 月份范围选择器需要数组格式 [开始月, 结束月]
-      return [currentMonth, currentMonth];
+      return [startMonthStr, currentMonthStr];
     },
     // 图表自适应
     resizeChart() {
@@ -80,7 +93,6 @@ export default {
         .then(res => {
           // 把 rows 赋值给 retData
           if (res && res.rows) {
-
             this.retData = res.rows;
             this.colorMap = this.generateMacaronColorMap(this.retData.length);
           } else {
@@ -108,13 +120,31 @@ export default {
     generateDateScale() {
       this.dateScale = [];
       if (!this.dateRange || this.dateRange.length < 2) {
-        // 无查询条件时默认显示当月
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth() + 1;
-        const lastDay = new Date(year, month, 0).getDate();
-        for (let day = 1; day <= lastDay; day++) {
-          this.dateScale.push(`${month}/${day}`);
+        // 无查询条件时默认显示最近3个月
+        const [startMonthStr, endMonthStr] = this.getDefaultMonthRange();
+        const [startYear, startMonth] = startMonthStr.split('-').map(Number);
+        const [endYear, endMonth] = endMonthStr.split('-').map(Number);
+        
+        // 生成开始月份的所有日期
+        const startLastDay = new Date(startYear, startMonth, 0).getDate();
+        for (let day = 1; day <= startLastDay; day++) {
+          this.dateScale.push(`${startMonth}/${day}`);
+        }
+        // 生成中间月份（如果有）的所有日期
+        if (endMonth - startMonth > 1) {
+          for (let m = startMonth + 1; m < endMonth; m++) {
+            const lastDay = new Date(endYear, m, 0).getDate();
+            for (let day = 1; day <= lastDay; day++) {
+              this.dateScale.push(`${m}/${day}`);
+            }
+          }
+        }
+        // 生成结束月份的所有日期
+        if (startMonth !== endMonth) {
+          const endLastDay = new Date(endYear, endMonth, 0).getDate();
+          for (let day = 1; day <= endLastDay; day++) {
+            this.dateScale.push(`${endMonth}/${day}`);
+          }
         }
         return;
       }

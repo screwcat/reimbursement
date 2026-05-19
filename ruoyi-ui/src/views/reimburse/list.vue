@@ -78,6 +78,7 @@
       <!-- 审批状态印章 -->
       <div class="approval-seal approved-seal" v-if="processStatus === 'APPROVED'">通过</div>
       <div class="approval-seal rejected-seal" v-if="processStatus === 'REJECTED'">拒绝</div>
+      <div class="approval-seal rejected-seal" v-if="processStatus === 'PAID'">已支付</div>
 
       <el-table
         v-loading="loading"
@@ -458,6 +459,12 @@ export default {
 .rejected-seal {
   background-color: #f56c6c;
   border: 3px solid #ff4d4f;
+}
+
+/* 已支付印章样式 - 黄色 */
+.rejected-seal {
+  background-color: #fcc96a;
+  border: 2px solid #cfa659;
 }
 
 /* 印章文字样式优化 */

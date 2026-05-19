@@ -127,6 +127,13 @@ public class ReimburseDocController extends BaseController
         return toAjax(ReimburseDocService.changeProcessState(docId,"DRAFT"));
     }
 
+    @Log(title = "撤销申请", businessType = BusinessType.UPDATE)
+    @PostMapping("/paidReimburse/{docId}")
+    public AjaxResult paidReimburse(@PathVariable Long docId)
+    {
+        return toAjax(ReimburseDocService.changeProcessState(docId,"PAID"));
+    }
+
     @Log(title = "更改审核状态", businessType = BusinessType.INSERT)
     @PostMapping("/changeProcessState")
     public AjaxResult changeProcessState(@RequestBody Map<String, Object> sysReimburse)

@@ -117,6 +117,15 @@
           <el-button
             size="mini"
             type="text"
+            icon="el-icon-s-check"
+            @click="handlePaid(scope.row)"
+            v-hasPermi="['system:reimburse:paid']"
+            v-if="scope.row.processStatus === 'APPROVED'"
+            style="color: red;"
+          >设置支付完成</el-button>
+          <el-button
+            size="mini"
+            type="text"
             icon="el-icon-circle-check"
             @click="handleSubmit(scope.row)"
             v-hasPermi="['system:reimburse:submit']"
@@ -176,7 +185,7 @@
 </template>
 
 <script>
-import { listDoc, getDoc, delDoc, addDoc, updateDoc, listSummary, submitReimburse, cancelReimburse } from "@/api/reimburse1/doc"
+import { listDoc, getDoc, delDoc, addDoc, updateDoc, listSummary, submitReimburse, cancelReimburse, paidReimburse } from "@/api/reimburse1/doc"
 
 export default {
   name: "Doc",
@@ -316,6 +325,19 @@ export default {
         this.open = true
         this.title = "修改报销单据"
       })
+    },
+    // 设置已支付
+    handlePaid(row) {
+      this.$confirm('确认将该单据状态设置成已支付吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        paidReimburse(row.docId).then(response => {
+          this.$modal.msgSuccess("设置成功");
+          this.getList();
+        });
+      }).catch(() => {});
     },
     /** 提交按钮 */
     submitForm() {
